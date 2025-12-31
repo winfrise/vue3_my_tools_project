@@ -1,7 +1,6 @@
 import Mock from 'mockjs'
 import { SUCCESS_CODE } from '@/constants'
 import { toAnyString } from '@/utils'
-import component from 'virtual:svg-icons-register'
 
 const timeout = 1000
 
@@ -71,7 +70,14 @@ const adminList = [
         meta: {
           title: 'Demo'
         }
-      }
+      },
+      {
+        path: 'qianwen-demo',
+        component: 'views/Demos-qianwen/VideoPage',
+        meta: {
+          title: '千问Demo'
+        }
+      },
     ]
   },
   {
