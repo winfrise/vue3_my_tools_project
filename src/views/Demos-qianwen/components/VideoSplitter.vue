@@ -1,6 +1,6 @@
 <!-- src/components/VideoSplitter.vue -->
 <script setup lang="ts">
-import { ref, onBeforeUnmount } from 'vue';
+import { ref, onBeforeUnmount, reactive } from 'vue';
 import VideoPlayer from './VideoPlayer.vue';
 import Timeline from './Timeline.vue';
 import SegmentList from './SegmentList.vue';
@@ -54,6 +54,7 @@ const handleFileUpload = (e: Event) => {
     segments.value = [];
   };
 };
+
 
 // --- 视频控制 ---
 const play = () => {

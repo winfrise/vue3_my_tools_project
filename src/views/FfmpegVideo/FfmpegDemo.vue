@@ -4,7 +4,7 @@
     <VideoUpload v-model="videoUrl" />
 
     <el-card>
-      <VideoCropper :videoUrl="videoUrl" :maxSelection="maxSelection"  />
+      <VideoCropper :background="true" :videoUrl="videoUrl" :maxSelection="maxSelection"  />
     </el-card>
 
     <el-card>
