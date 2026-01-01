@@ -1,142 +1,12 @@
-<!-- src/components/Timeline.vue -->
-<script setup lang="ts">
-import { ref, computed } from 'vue';
-import { Segment, VideoInfo } from '../types/video';
-
-interface Props {
-  videoInfo: VideoInfo | null;
-  segments: Segment[];
-  currentTime: number;
-  onSegmentChange: (segments: Segment[]) => void;
-  onCurrentTimeChange: (time: number) => void;
-  onPlay: () => void;
-  onPause: () => void;
-  isPlaying: boolean;
-}
-
-const props = defineProps<Props>();
-
-const timelineRef = ref<HTMLDivElement | null>(null);
-const tempStart = ref<number | null>(null); // 入点
-const clickPosition = ref<number | null>(null); // 点击跳转位置
-const selectedSegmentId = ref<string | null>(null); // 当前选中片段 ID
-
-const totalDuration = computed(() => props.videoInfo?.duration || 0);
-
-const selectedSegment = computed(() => {
-  if (!selectedSegmentId.value) return null;
-  return props.segments.find(s => s.id === selectedSegmentId.value);
-});
-
-const formatTime = (seconds: number): string => {
-  if (isNaN(seconds) || seconds < 0) return '--:--';
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
-};
-
-// 点击时间轴：跳转 + 显示指示线
-const jumpToTime = (e: MouseEvent) => {
-  const rect = timelineRef.value?.getBoundingClientRect();
-  if (!rect || totalDuration.value <= 0) return;
-
-  const x = e.clientX - rect.left;
-  const percent = Math.max(0, Math.min(1, x / rect.width));
-  const targetTime = percent * totalDuration.value;
-
-  props.onCurrentTimeChange(targetTime);
-  clickPosition.value = targetTime;
-};
-
-const setStartTime = () => {
-  if (props.currentTime >= 0 && props.currentTime <= totalDuration.value) {
-    tempStart.value = props.currentTime;
-  }
-};
-
-const setEndTime = () => {
-  if (tempStart.value === null) {
-    alert('请先标记开始时间！');
-    return;
-  }
-
-  const end = props.currentTime;
-  if (end <= tempStart.value) {
-    alert('结束时间必须大于开始时间！');
-    return;
-  }
-
-  const newSegment: Segment = {
-    id: `seg-${Date.now()}`,
-    startTime: tempStart.value,
-    endTime: end,
-    duration: end - tempStart.value,
-    frames: Math.round((end - tempStart.value) * 30),
-    size: '~' + ((end - tempStart.value) * 100).toFixed(0) + 'KB'
-  };
-
-  const updatedSegments = [...props.segments, newSegment];
-  props.onSegmentChange(updatedSegments);
-  tempStart.value = null;
-};
-
-const removeSegment = (id: string) => {
-  const filtered = props.segments.filter(seg => seg.id !== id);
-  props.onSegmentChange(filtered);
-  if (selectedSegmentId.value === id) selectedSegmentId.value = null;
-};
-
-const getPercent = (time: number): string => {
-  if (totalDuration.value <= 0) return '0%';
-  return `${Math.max(0, Math.min(100, (time / totalDuration.value) * 100))}%`;
-};
-
-// 新增：控制函数
-const goToStart = () => props.onCurrentTimeChange(0);
-const goToEnd = () => props.onCurrentTimeChange(totalDuration.value);
-const goToSegmentStart = () => {
-  if (selectedSegment.value) {
-    props.onCurrentTimeChange(selectedSegment.value.startTime);
-  }
-};
-const goToSegmentEnd = () => {
-  if (selectedSegment.value) {
-    props.onCurrentTimeChange(selectedSegment.value.endTime);
-  }
-};
-const togglePlayPause = () => {
-  if (props.isPlaying) {
-    props.onPause();
-  } else {
-    props.onPlay();
-  }
-};
-const goBackFrame = () => {
-  // 假设 30fps
-  const frameDuration = 1 / 30;
-  const newTime = Math.max(0, props.currentTime - frameDuration);
-  props.onCurrentTimeChange(newTime);
-};
-const goForwardFrame = () => {
-  // 假设 30fps
-  const frameDuration = 1 / 30;
-  const newTime = Math.min(totalDuration.value, props.currentTime + frameDuration);
-  props.onCurrentTimeChange(newTime);
-};
-</script>
-
 <template>
   <div class="timeline-container">
     <!-- 时间轴 -->
-    <div
-      ref="timelineRef"
-      class="timeline"
+    <div ref="timelineRef" class="timeline"
       @click="jumpToTime"
     >
       <div class="track">
         <!-- 播放进度 -->
-        <div
-          class="progress"
+        <div class="progress"
           :style="{ width: `${(currentTime / totalDuration) * 100}%` }"
         ></div>
 
@@ -242,7 +112,133 @@ const goForwardFrame = () => {
   </div>
 </template>
 
-<style scoped>
+<script setup lang="ts">
+import { ref, computed } from 'vue';
+import { Segment, VideoInfo } from '../types/video';
+
+interface Props {
+  videoInfo: VideoInfo | null;
+  segments: Segment[];
+  currentTime: number;
+  onSegmentChange: (segments: Segment[]) => void;
+  onCurrentTimeChange: (time: number) => void;
+  onPlay: () => void;
+  onPause: () => void;
+  isPlaying: boolean;
+}
+
+const props = defineProps<Props>();
+
+const timelineRef = ref<HTMLDivElement | null>(null);
+const tempStart = ref<number | null>(null); // 入点
+const clickPosition = ref<number | null>(null); // 点击跳转位置
+const selectedSegmentId = ref<string | null>(null); // 当前选中片段 ID
+
+const totalDuration = computed(() => props.videoInfo?.duration || 0);
+
+const selectedSegment = computed(() => {
+  if (!selectedSegmentId.value) return null;
+  return props.segments.find(s => s.id === selectedSegmentId.value);
+});
+
+const formatTime = (seconds: number): string => {
+  if (isNaN(seconds) || seconds < 0) return '--:--';
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+};
+
+// 点击时间轴：跳转 + 显示指示线
+const jumpToTime = (e: MouseEvent) => {
+  const rect = timelineRef.value?.getBoundingClientRect();
+  if (!rect || totalDuration.value <= 0) return;
+
+  const x = e.clientX - rect.left;
+  const percent = Math.max(0, Math.min(1, x / rect.width));
+  const targetTime = percent * totalDuration.value;
+  console.log(props.onCurrentTimeChange)
+  props.onCurrentTimeChange(targetTime);
+  clickPosition.value = targetTime;
+};
+
+const setStartTime = () => {
+  if (props.currentTime >= 0 && props.currentTime <= totalDuration.value) {
+    tempStart.value = props.currentTime;
+  }
+};
+
+const setEndTime = () => {
+  if (tempStart.value === null) {
+    alert('请先标记开始时间！');
+    return;
+  }
+
+  const end = props.currentTime;
+  if (end <= tempStart.value) {
+    alert('结束时间必须大于开始时间！');
+    return;
+  }
+
+  const newSegment: Segment = {
+    id: `seg-${Date.now()}`,
+    startTime: tempStart.value,
+    endTime: end,
+    duration: end - tempStart.value,
+    frames: Math.round((end - tempStart.value) * 30),
+    size: '~' + ((end - tempStart.value) * 100).toFixed(0) + 'KB'
+  };
+
+  const updatedSegments = [...props.segments, newSegment];
+  props.onSegmentChange(updatedSegments);
+  tempStart.value = null;
+};
+
+const removeSegment = (id: string) => {
+  const filtered = props.segments.filter(seg => seg.id !== id);
+  props.onSegmentChange(filtered);
+  if (selectedSegmentId.value === id) selectedSegmentId.value = null;
+};
+
+const getPercent = (time: number): string => {
+  if (totalDuration.value <= 0) return '0%';
+  return `${Math.max(0, Math.min(100, (time / totalDuration.value) * 100))}%`;
+};
+
+// 新增：控制函数
+const goToStart = () => props.onCurrentTimeChange(0);
+const goToEnd = () => props.onCurrentTimeChange(totalDuration.value);
+const goToSegmentStart = () => {
+  if (selectedSegment.value) {
+    props.onCurrentTimeChange(selectedSegment.value.startTime);
+  }
+};
+const goToSegmentEnd = () => {
+  if (selectedSegment.value) {
+    props.onCurrentTimeChange(selectedSegment.value.endTime);
+  }
+};
+const togglePlayPause = () => {
+  if (props.isPlaying) {
+    props.onPause();
+  } else {
+    props.onPlay();
+  }
+};
+const goBackFrame = () => {
+  // 假设 30fps
+  const frameDuration = 1 / 30;
+  const newTime = Math.max(0, props.currentTime - frameDuration);
+  props.onCurrentTimeChange(newTime);
+};
+const goForwardFrame = () => {
+  // 假设 30fps
+  const frameDuration = 1 / 30;
+  const newTime = Math.min(totalDuration.value, props.currentTime + frameDuration);
+  props.onCurrentTimeChange(newTime);
+};
+</script>
+
+<style lang="scss" scoped>
 .timeline-container {
   display: flex;
   flex-direction: column;
@@ -278,29 +274,34 @@ const goForwardFrame = () => {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 2px;
+  width: 1px;
   background-color: #9ca3af;
   z-index: 5;
+
+  .triangle-up,
+  .triangle-down {
+    position: absolute;
+    left: 50%;
+    width: 0;
+    height: 0;
+    transform: translate(-50%, 0);
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+  }
+
+  .triangle-up {
+    top: -0;
+    border-top: 8px solid #9ca3af;
+  }
+
+  .triangle-down {
+    bottom: -0;
+    border-bottom: 8px solid #9ca3af;
+  }
+
 }
 
-.triangle-up,
-.triangle-down {
-  position: absolute;
-  width: 0;
-  height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-}
 
-.triangle-up {
-  top: -8px;
-  border-bottom: 8px solid #9ca3af;
-}
-
-.triangle-down {
-  bottom: -8px;
-  border-top: 8px solid #9ca3af;
-}
 
 .in-point-marker {
   position: absolute;

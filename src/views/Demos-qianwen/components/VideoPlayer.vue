@@ -57,7 +57,7 @@ defineExpose({
 
 <template>
   <div class="video-player">
-    <video
+    <video controls
       ref="videoRef"
       :src="props.videoInfo?.url || ''"
       @timeupdate="handleTimeUpdate"
