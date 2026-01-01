@@ -10,7 +10,13 @@
       @loadedmetadata="handleMetadataLoaded"
       style="width: 100%; height: 100%; background: #000"
     />
-    <CropperWrapper v-if="isLoaded && selectedSegment?.enableCrop" class="video-cropper" :background="false" :initSelection="initSelection" :selectionOptions="selectionOptions" :maxSelection="maxSelection" />
+    <CropperWrapper v-if="isLoaded && selectedSegment?.enableCrop" class="video-cropper" 
+      :background="false" 
+      :initSelection="initSelection" 
+      :selectionOptions="selectionOptions" 
+      :maxSelection="maxSelection" 
+      @selectionChange="handleSelectionChange"
+    />
   </div>
 </template>
 
@@ -43,6 +49,10 @@ const handleTimeUpdate = () => {
   if (videoRef.value) props.onTimeUpdate(videoRef.value.currentTime);
 };
 
+const handleSelectionChange = (selection) => {
+  const { x: cropX, y: cropY, width: cropWidth, height: cropHeight} = selection
+  Object.assign(props.selectedSegment!, {cropX, cropY, cropWidth, cropHeight})
+}
 // 暴露 play / pause 方法给父组件
 const play = () => {
   if (videoRef.value) {
@@ -64,13 +74,15 @@ const setCurrentTime = (currentTime:number) => {
   }
 }
 
-const initSelection = reactive({
-  x: 0,
-  y: 0,
-  width: 0,
-  height: 0,
+const initSelection = computed(() => {
+  const { selectedSegment } =  props
+  return {
+    x: selectedSegment?.cropX,
+    y: selectedSegment?.cropY,
+    width: selectedSegment?.cropWidth,
+    height: selectedSegment?.cropY
+  }
 })
-
 
 const maxSelection = computed(() => {
   return {

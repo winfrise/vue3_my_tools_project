@@ -91,6 +91,7 @@
             }
         }
         selectionData.value = event.detail;
+        console.log(event)
         emit('selectionChange', unref(selectionData))
     }
 
