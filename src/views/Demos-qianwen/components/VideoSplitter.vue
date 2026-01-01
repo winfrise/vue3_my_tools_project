@@ -1,4 +1,64 @@
-<!-- src/components/VideoSplitter.vue -->
+<template>
+  <div class="video-splitter">
+    <!-- 上传区 -->
+    <div class="upload-section">
+      <label class="upload-label">
+        📎 选择视频文件：
+        <input type="file" accept="video/*" @change="handleFileUpload" />
+      </label>
+      <div v-if="videoInfo" class="video-meta">
+        {{ videoInfo.file.name }} |
+        {{ Math.round(videoInfo.duration) }}s |
+        {{ videoInfo.width }}×{{ videoInfo.height }}
+      </div>
+    </div>
+
+    <!-- 主区域 -->
+    <div class="main-area" v-if="videoInfo">
+      <!-- 视频播放器 -->
+      <div class="video-container">
+        <VideoPlayer
+          ref="videoPlayerRef"
+          :video-info="videoInfo"
+          :current-time="currentTime"
+          :selectedSegment="selectedSegment"
+          @time-update="currentTime = $event"
+          @play="isPlaying = true"
+          @pause="isPlaying = false"
+        />
+      </div>
+
+      <!-- 控制按钮 -->
+      <div class="controls">
+        <button @click="isPlaying ? pause() : play()">
+          {{ isPlaying ? '⏸️ 暂停' : '▶️ 播放' }}
+        </button>
+        <button @click="takeScreenshot()">📷 截图</button>
+        <button @click="exportSegments()">💾 导出片段</button>
+      </div>
+
+      <!-- 时间轴（带工具栏） -->
+      <Timeline
+        :video-info="videoInfo"
+        :segments="segments"
+        :current-time="currentTime"
+        :is-playing="isPlaying"
+        v-model:selectedSegment="selectedSegment"
+        @segment-change="segments = $event"
+        @current-time-change="handleCurrentTimeChange"
+        @play="play"
+        @pause="pause"
+      />
+    </div>
+
+    <!-- 侧边栏：片段列表 -->
+    <div class="sidebar" v-if="videoInfo">
+      <SegmentList :segments="segments" :video-info="videoInfo" @remove="removeSegment" />
+    </div>
+  </div>
+</template>
+
+
 <script setup lang="ts">
 import { ref, onBeforeUnmount, reactive } from 'vue';
 import VideoPlayer from './VideoPlayer.vue';
@@ -15,6 +75,8 @@ const videoInfo = ref<VideoInfo | null>(null);
 const currentTime = ref(0);
 const segments = ref<Segment[]>([]);
 const isPlaying = ref(false);
+
+const selectedSegment = ref()
 
 // --- 文件上传 ---
 const handleFileUpload = (e: Event) => {
@@ -103,64 +165,6 @@ const handleCurrentTimeChange = (newCurrentTime:number) => {
   videoPlayerRef.value?.setCurrentTime(newCurrentTime)
 }
 </script>
-
-<template>
-  <div class="video-splitter">
-    <!-- 上传区 -->
-    <div class="upload-section">
-      <label class="upload-label">
-        📎 选择视频文件：
-        <input type="file" accept="video/*" @change="handleFileUpload" />
-      </label>
-      <div v-if="videoInfo" class="video-meta">
-        {{ videoInfo.file.name }} |
-        {{ Math.round(videoInfo.duration) }}s |
-        {{ videoInfo.width }}×{{ videoInfo.height }}
-      </div>
-    </div>
-
-    <!-- 主区域 -->
-    <div class="main-area" v-if="videoInfo">
-      <!-- 视频播放器 -->
-      <div class="video-container">
-        <VideoPlayer
-          ref="videoPlayerRef"
-          :video-info="videoInfo"
-          :current-time="currentTime"
-          @time-update="currentTime = $event"
-          @play="isPlaying = true"
-          @pause="isPlaying = false"
-        />
-      </div>
-
-      <!-- 控制按钮 -->
-      <div class="controls">
-        <button @click="isPlaying ? pause() : play()">
-          {{ isPlaying ? '⏸️ 暂停' : '▶️ 播放' }}
-        </button>
-        <button @click="takeScreenshot()">📷 截图</button>
-        <button @click="exportSegments()">💾 导出片段</button>
-      </div>
-
-      <!-- 时间轴（带工具栏） -->
-      <Timeline
-        :video-info="videoInfo"
-        :segments="segments"
-        :current-time="currentTime"
-        :is-playing="isPlaying"
-        @segment-change="segments = $event"
-        @current-time-change="handleCurrentTimeChange"
-        @play="play"
-        @pause="pause"
-      />
-    </div>
-
-    <!-- 侧边栏：片段列表 -->
-    <div class="sidebar" v-if="videoInfo">
-      <SegmentList :segments="segments" :video-info="videoInfo" @remove="removeSegment" />
-    </div>
-  </div>
-</template>
 
 <style scoped>
 .video-splitter {

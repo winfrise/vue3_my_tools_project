@@ -17,7 +17,7 @@
         <!-- 已保存片段 -->
         <div v-for="seg in segments" :key="seg.id" class="segment" :class="{ 'selected': seg.id === selectedSegmentId }"
           :style="{ left: timeToPercent(seg.startTime), width: `${(seg.duration / totalDuration) * 100}%` }"
-          @click="selectedSegmentId = seg.id">
+          @click="selectedSegment = seg">
           <span class="label">{{ formatTime(seg.startTime) }} - {{ formatTime(seg.endTime) }}</span>
           <button class="remove-btn" @click.stop="removeSegment(seg.id)">×</button>
         </div>
@@ -30,10 +30,12 @@
       <div class="selected-info">
         <template v-if="selectedSegment">
           选中: <strong>{{ selectedSegment.id }} </strong>
-          [ {{ formatTime(selectedSegment.startTime) }} → {{ formatTime(selectedSegment.endTime) }} ] 
-
           <el-divider direction="vertical" />
+          [ {{ formatTime(selectedSegment.startTime) }} → {{ formatTime(selectedSegment.endTime) }} ] 
+        </template>
+        <span v-else>未选中任何片段</span>
 
+        <div class="selected-tools">
           <el-button type="info" :disabled="!selectedSegment" @click="goToSegmentStart">
             跳转到选中片段开始
           </el-button>
@@ -41,24 +43,28 @@
             跳转到选中片段结束
           </el-button>
 
+          <el-switch v-if="selectedSegment"
+            v-model="selectedSegment!.enableCrop"
+        
+            active-text="裁剪开启"
+            inactive-text="裁剪关闭"
+          ></el-switch>
+
           <el-divider direction="vertical" />
 
           <el-button type="danger" @click="cancelSelectedSegment">取消选中</el-button>
-        </template>
-        <span v-else>未选中任何片段</span>
+        </div>
       </div>
 
       <!-- 时间轴控制按钮 -->
-      <div class="controls">
-        <el-button @click="goToStart">回到最开始</el-button>
-        <el-button @click="goBackFrame">⏪前一帧</el-button>
-        <el-button @click="togglePlayPause">
+      <div class="video-controls">
+        <el-button type="info" @click="goToStart">回到最开始</el-button>
+        <el-button type="info" @click="goBackFrame">⏪前一帧</el-button>
+        <el-button type="info" @click="togglePlayPause">
           {{ isPlaying ? '暂停⏸️' : '播放▶️' }}
         </el-button>
-        <el-button @click="goForwardFrame">后一帧⏩</el-button>
-        <el-button @click="goToEnd">回到最末尾</el-button>
-
-
+        <el-button type="info" @click="goForwardFrame">后一帧⏩</el-button>
+        <el-button type="info" @click="goToEnd">回到最末尾</el-button>
       </div>
 
       <!-- 标记工具 -->
@@ -97,21 +103,31 @@ interface Props {
   onPlay: () => void;
   onPause: () => void;
   isPlaying: boolean;
+  selectedSegment: Segment | undefined
 }
 
 const props = defineProps<Props>();
+const emit = defineEmits(['update:selectedSegment'])
 
 const timelineRef = ref<HTMLDivElement | null>(null);
 const tempStart = ref<number | null>(null); // 入点
 const clickPosition = ref<number | null>(null); // 点击跳转位置
-const selectedSegmentId = ref<string | null>(null); // 当前选中片段 ID
+
 
 const totalDuration = computed(() => props.videoInfo?.duration || 0);
 
-const selectedSegment = computed(() => {
-  if (!selectedSegmentId.value) return null;
-  return props.segments.find(s => s.id === selectedSegmentId.value);
-});
+const selectedSegment = computed({
+  get() {
+    return props.selectedSegment
+  },
+  set(seg) {
+    emit('update:selectedSegment', seg)
+  }
+})
+
+const selectedSegmentId = computed(() => {
+  return selectedSegment.value?.id
+})
 
 const formatTime = (seconds: number): string => {
   if (isNaN(seconds) || seconds < 0) return '--:--';
@@ -144,7 +160,7 @@ const jumpToTime = (e: MouseEvent) => {
 
 // 取消选中的片断
 const cancelSelectedSegment = () => {
-  selectedSegmentId.value = null
+  selectedSegment.value = undefined
 }
 
 const setStartTime = () => {
@@ -182,7 +198,7 @@ const setEndTime = () => {
 const removeSegment = (id: string) => {
   const filtered = props.segments.filter(seg => seg.id !== id);
   props.onSegmentChange(filtered);
-  if (selectedSegmentId.value === id) selectedSegmentId.value = null;
+  if (selectedSegmentId.value === id) cancelSelectedSegment()
 };
 
 const timeToPercent = (time: number): string => {
@@ -370,9 +386,12 @@ const goForwardFrame = () => {
 .selected-info {
   font-size: 12px;
   color: #4b5563;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  .selected-tools{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
 }
 
 .btn-clear {
@@ -385,7 +404,7 @@ const goForwardFrame = () => {
   cursor: pointer;
 }
 
-.controls {
+.video-controls {
   display: flex;
   align-items: center;
   gap: 6px;

@@ -1,4 +1,5 @@
 <template>
+  xxx{{ selectedSegment }}
   <div class="video-player" ref="videoContainer">
     <video controls
       ref="videoRef"
@@ -9,21 +10,21 @@
       @loadedmetadata="handleMetadataLoaded"
       style="width: 100%; height: 100%; background: #000"
     />
-    <CropperWrapper v-if="isLoaded" class="video-cropper" :background="false" :initSelection="initSelection" :selectionOptions="selectionOptions" :maxSelection="maxSelection" />
+    <CropperWrapper v-if="isLoaded && selectedSegment?.enableCrop" class="video-cropper" :background="false" :initSelection="initSelection" :selectionOptions="selectionOptions" :maxSelection="maxSelection" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, reactive, computed } from 'vue';
-import { VideoInfo } from '../types/video';
+import { VideoInfo, Segment } from '../types/video';
 import CropperWrapper from './CropperWrapper.vue';
 
 interface Props {
   videoInfo: VideoInfo | null;
-  // currentTime: number;
   onTimeUpdate: (time: number) => void;
   onPlay: () => void;
   onPause: () => void;
+  selectedSegment: Segment | undefined
 }
 
 const props = defineProps<Props>();
