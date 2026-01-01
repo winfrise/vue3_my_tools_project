@@ -95,6 +95,11 @@ onBeforeUnmount(() => {
     URL.revokeObjectURL(videoInfo.value.url);
   }
 });
+
+const handleCurrentTimeChange = (newCurrentTime:number) => {
+  currentTime.value = newCurrentTime
+  videoPlayerRef.value?.setCurrentTime(newCurrentTime)
+}
 </script>
 
 <template>
@@ -142,7 +147,7 @@ onBeforeUnmount(() => {
         :current-time="currentTime"
         :is-playing="isPlaying"
         @segment-change="segments = $event"
-        @current-time-change="currentTime = $event"
+        @current-time-change="handleCurrentTimeChange"
         @play="play"
         @pause="pause"
       />

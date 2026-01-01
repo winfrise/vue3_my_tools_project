@@ -156,7 +156,7 @@ const jumpToTime = (e: MouseEvent) => {
   const x = e.clientX - rect.left;
   const percent = Math.max(0, Math.min(1, x / rect.width));
   const targetTime = percent * totalDuration.value;
-  console.log(props.onCurrentTimeChange)
+
   props.onCurrentTimeChange(targetTime);
   clickPosition.value = targetTime;
 };

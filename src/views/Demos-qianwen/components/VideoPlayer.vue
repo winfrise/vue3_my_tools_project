@@ -5,7 +5,7 @@ import { VideoInfo } from '../types/video';
 
 interface Props {
   videoInfo: VideoInfo | null;
-  currentTime: number;
+  // currentTime: number;
   onTimeUpdate: (time: number) => void;
   onPlay: () => void;
   onPause: () => void;
@@ -21,14 +21,14 @@ onMounted(() => {
 });
 
 // 监听 currentTime 变化（父组件控制）
-watch(
-  () => props.currentTime,
-  (newTime) => {
-    if (videoRef.value && !isNaN(newTime)) {
-      videoRef.value.currentTime = newTime;
-    }
-  }
-);
+// watch(
+//   () => props.currentTime,
+//   (newTime) => {
+//     if (videoRef.value && !isNaN(newTime)) {
+//       videoRef.value.currentTime = newTime;
+//     }
+//   }
+// );
 
 const handleTimeUpdate = () => {
   if (videoRef.value) props.onTimeUpdate(videoRef.value.currentTime);
@@ -49,9 +49,16 @@ const pause = () => {
   }
 };
 
+const setCurrentTime = (currentTime:number) => {
+  if (videoRef.value) {
+    videoRef.value.currentTime = currentTime
+  }
+}
+
 defineExpose({
   play,
-  pause
+  pause,
+  setCurrentTime
 });
 </script>
 
