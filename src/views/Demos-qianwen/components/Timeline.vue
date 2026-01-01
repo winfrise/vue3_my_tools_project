@@ -12,9 +12,9 @@
 
         <!-- 点击跳转指示线 -->
         <div
-          v-if="clickPosition !== null"
+          v-if="currentTime !== null"
           class="click-indicator"
-          :style="{ left: getPercent(clickPosition) }"
+          :style="{ left: getPercent(currentTime) }"
         >
           <div class="triangle-up"></div>
           <div class="triangle-down"></div>
@@ -56,11 +56,11 @@
       <!-- 时间轴控制按钮 -->
       <div class="controls">
         <button class="btn btn-small" @click="goToStart" title="回到最开始">⏮️</button>
-        <button class="btn btn-small" @click="goBackFrame" title="前一帧">⏪</button>
+        <button class="btn btn-small" @click="goBackFrame">⏪前一帧</button>
         <button class="btn btn-play" @click="togglePlayPause" :title="isPlaying ? '暂停' : '播放'">
           {{ isPlaying ? '⏸️' : '▶️' }}
         </button>
-        <button class="btn btn-small" @click="goForwardFrame" title="后一帧">⏩</button>
+        <button class="btn btn-small" @click="goForwardFrame">后一帧⏩</button>
         <button class="btn btn-small" @click="goToEnd" title="回到最末尾">⏭️</button>
 
         <div class="divider"></div>
@@ -152,6 +152,11 @@ const formatTime = (seconds: number): string => {
 const jumpToTime = (e: MouseEvent) => {
   const rect = timelineRef.value?.getBoundingClientRect();
   if (!rect || totalDuration.value <= 0) return;
+
+  // 暂停播放
+  if (props.isPlaying) {
+    props.onPause();
+  }
 
   const x = e.clientX - rect.left;
   const percent = Math.max(0, Math.min(1, x / rect.width));
@@ -420,11 +425,6 @@ const goForwardFrame = () => {
   cursor: not-allowed;
 }
 
-.btn-small {
-  width: 32px;
-  height: 32px;
-  font-size: 16px;
-}
 
 .btn-play {
   width: 40px;
