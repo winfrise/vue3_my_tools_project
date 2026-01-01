@@ -10,6 +10,7 @@ export interface Segment {
 
 export interface VideoInfo {
   file: File;
+  filename: string,
   url: string;
   duration: number;
   width: number;

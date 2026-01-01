@@ -36,6 +36,7 @@ const handleFileUpload = (e: Event) => {
   const url = URL.createObjectURL(file);
   videoInfo.value = {
     file,
+    filename: file.name,
     url,
     duration: 0,
     width: 0,
@@ -155,7 +156,7 @@ const handleCurrentTimeChange = (newCurrentTime:number) => {
 
     <!-- 侧边栏：片段列表 -->
     <div class="sidebar" v-if="videoInfo">
-      <SegmentList :segments="segments" @remove="removeSegment" />
+      <SegmentList :segments="segments" :video-info="videoInfo" @remove="removeSegment" />
     </div>
   </div>
 </template>
