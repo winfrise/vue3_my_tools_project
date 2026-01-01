@@ -22,6 +22,7 @@
           :video-info="videoInfo"
           :current-time="currentTime"
           :selectedSegment="selectedSegment"
+          v-model:videoDisplayInfo="videoDisplayInfo"
           @time-update="currentTime = $event"
           @play="isPlaying = true"
           @pause="isPlaying = false"
@@ -53,7 +54,7 @@
 
     <!-- 侧边栏：片段列表 -->
     <div class="sidebar" v-if="videoInfo">
-      <SegmentList :segments="segments" :video-info="videoInfo" @remove="removeSegment" />
+      <SegmentList :segments="segments" :video-info="videoInfo" :videoDisplayInfo="videoDisplayInfo" @remove="removeSegment" />
     </div>
   </div>
 </template>
@@ -64,7 +65,7 @@ import { ref, onBeforeUnmount, reactive } from 'vue';
 import VideoPlayer from './VideoPlayer.vue';
 import Timeline from './Timeline.vue';
 import SegmentList from './SegmentList.vue';
-import { VideoInfo, Segment } from '../types/video';
+import { VideoInfo, Segment, VideoDisplayInfo } from '../types/video';
 
 // refs
 const videoPlayerRef = ref<InstanceType<typeof VideoPlayer> | null>(null);
@@ -75,6 +76,15 @@ const videoInfo = ref<VideoInfo | null>(null);
 const currentTime = ref(0);
 const segments = ref<Segment[]>([]);
 const isPlaying = ref(false);
+
+const videoDisplayInfo = reactive<VideoDisplayInfo>({
+  videoY: 0,
+  videoX: 0,
+  displayWidth: 0,
+  displayHeight: 0,
+  containerWidth: 0,
+  containerHeight: 0
+})
 
 const selectedSegment = ref()
 

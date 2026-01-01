@@ -21,3 +21,12 @@ export interface VideoInfo {
   width: number;
   height: number;
 }
+
+export interface VideoDisplayInfo {
+  videoY: number,
+  videoX: number,
+  displayWidth: number,
+  displayHeight: number,
+  containerWidth: number,
+  containerHeight: number
+}

@@ -1,5 +1,4 @@
 <template>
-  xxx{{ selectedSegment }}
   <div class="video-player" ref="videoContainer">
     <video controls
       ref="videoRef"
@@ -22,7 +21,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, reactive, computed } from 'vue';
-import { VideoInfo, Segment } from '../types/video';
+import { VideoInfo, Segment, VideoDisplayInfo } from '../types/video';
 import CropperWrapper from './CropperWrapper.vue';
 
 interface Props {
@@ -30,7 +29,8 @@ interface Props {
   onTimeUpdate: (time: number) => void;
   onPlay: () => void;
   onPause: () => void;
-  selectedSegment: Segment | undefined
+  selectedSegment: Segment | undefined,
+  videoDisplayInfo: VideoDisplayInfo
 }
 
 const props = defineProps<Props>();
@@ -52,7 +52,7 @@ const handleTimeUpdate = () => {
 const handleSelectionChange = (selection) => {
   const { x, y, width, height} = selection
 
-  const {displayWidth, displayHeight, containerWidth, containerHeight} = videoDisplayInfo
+  const {displayWidth, displayHeight, containerWidth, containerHeight} = videoDisplayInfo.value
   const cropX = x / containerWidth
   const cropY = y / containerHeight
   const cropWidth = width / displayWidth
@@ -82,7 +82,7 @@ const setCurrentTime = (currentTime:number) => {
 
 const initSelection = computed(() => {
   const { selectedSegment } =  props
-  const {displayWidth, displayHeight, containerWidth, containerHeight, videoX, videoY} = videoDisplayInfo
+  const {displayWidth, displayHeight, containerWidth, containerHeight, videoX, videoY} = videoDisplayInfo.value
 
 
     const { cropX, cropY, cropWidth, cropHeight} = selectedSegment as Segment
@@ -100,10 +100,10 @@ const initSelection = computed(() => {
 
 const maxSelection = computed(() => {
   return {
-    y: videoDisplayInfo.videoY, 
-    x: videoDisplayInfo.videoX, 
-    width: videoDisplayInfo.displayWidth,
-    height: videoDisplayInfo.displayHeight
+    y: videoDisplayInfo.value.videoY, 
+    x: videoDisplayInfo.value.videoX, 
+    width: videoDisplayInfo.value.displayWidth,
+    height: videoDisplayInfo.value.displayHeight
   }
 })
 
@@ -112,13 +112,22 @@ const selectionOptions = reactive({
 })
 
 const videoContainer= ref()
-const videoDisplayInfo = reactive({
-  videoY: 0,
-  videoX: 0,
-  displayWidth: 0,
-  displayHeight: 0,
-  containerWidth: 0,
-  containerHeight: 0
+// const videoDisplayInfo = reactive({
+//   videoY: 0,
+//   videoX: 0,
+//   displayWidth: 0,
+//   displayHeight: 0,
+//   containerWidth: 0,
+//   containerHeight: 0
+// })
+
+const videoDisplayInfo = computed({
+  get () {
+    return props.videoDisplayInfo
+  },
+  set(val) {
+    Object.assign(props.videoDisplayInfo, val)
+  }
 })
 const isLoaded = ref(false)
 const handleMetadataLoaded = (event: Event) => {
@@ -149,14 +158,14 @@ const handleMetadataLoaded = (event: Event) => {
     const videoX = (containerWidth - displayWidth) / 2
     const videoY = (containerHeight - displayHeight) / 2
 
-    Object.assign(videoDisplayInfo, {
+    Object.assign(videoDisplayInfo.value, {
         videoX, 
         videoY, 
-        originalVideoWidth, 
-        originalVideoHeight, 
+        // originalVideoWidth, 
+        // originalVideoHeight, 
         displayWidth, 
         displayHeight,
-        scaleRatio,
+        // scaleRatio,
         containerWidth,
         containerHeight
     })

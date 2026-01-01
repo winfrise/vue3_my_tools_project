@@ -38,13 +38,14 @@
 </template>
 
 <script setup lang="ts">
-import { Segment, VideoInfo } from '../types/video';
+import { Segment, VideoInfo, VideoDisplayInfo } from '../types/video';
 import dayjs from 'dayjs'
 
 interface Props {
   segments: Segment[];
   onRemove: (id: string) => void;
-  videoInfo: VideoInfo | null
+  videoInfo: VideoInfo | null,
+  videoDisplayInfo: VideoDisplayInfo
 }
 
 const props = defineProps<Props>();
@@ -106,7 +107,12 @@ const copyBatchCmd = async () => {
 
     let videoFilter = ''
     if (enableCrop) {
-      videoFilter = ` -filter:v "crop=${cropWidth}:${cropHeight}:${cropX}:${cropY}"`
+      const { displayWidth, displayHeight, containerWidth, containerHeight, videoX, videoY} = props.videoDisplayInfo
+      const width = videoInfo!.width * cropWidth
+      const height = videoInfo!.height * cropHeight
+      const x = (containerWidth * cropX - videoX) / displayWidth * videoInfo!.width
+      const y = (containerHeight * cropY - videoY) / displayHeight * videoInfo!.height
+      videoFilter = ` -filter:v "crop=${width}:${height}:${x}:${y}"`
     }
 
     let cmd = `ffmpeg -ss ${startTime} -to ${endTime} -i "${filename}" ${videoFilter} -c:a copy "${outputFile}"`;
