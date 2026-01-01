@@ -1,41 +1,23 @@
 <template>
   <div class="timeline-container">
     <!-- 时间轴 -->
-    <div ref="timelineRef" class="timeline"
-      @click="jumpToTime"
-    >
+    <div ref="timelineRef" class="timeline" @click="jumpToTime">
       <div class="track">
         <!-- 播放进度 -->
-        <div class="progress"
-          :style="{ width: `${(currentTime / totalDuration) * 100}%` }"
-        ></div>
+        <div class="progress" :style="{ width: `${(currentTime / totalDuration) * 100}%` }"></div>
 
         <!-- 点击跳转指示线 -->
-        <div
-          v-if="currentTime !== null"
-          class="click-indicator"
-          :style="{ left: getPercent(currentTime) }"
-        >
-          <div class="triangle-up"></div>
-          <div class="triangle-down"></div>
+        <div v-if="currentTime !== null" class="indicator-line" :style="{ left: timeToPercent(currentTime) }">
+
         </div>
 
-        <!-- 入点标记 -->
-        <div
-          v-if="tempStart !== null"
-          class="in-point-marker"
-          :style="{ left: getPercent(tempStart) }"
-        ></div>
+        <!-- 片断临时开始标记 -->
+        <div v-if="tempStart !== null" class="temp-start-marker" :style="{ left: timeToPercent(tempStart) }"></div>
 
         <!-- 已保存片段 -->
-        <div
-          v-for="seg in segments"
-          :key="seg.id"
-          class="segment"
-          :class="{ 'selected': seg.id === selectedSegmentId }"
-          :style="{ left: getPercent(seg.startTime), width: `${(seg.duration / totalDuration) * 100}%` }"
-          @click.stop="selectedSegmentId = seg.id"
-        >
+        <div v-for="seg in segments" :key="seg.id" class="segment" :class="{ 'selected': seg.id === selectedSegmentId }"
+          :style="{ left: timeToPercent(seg.startTime), width: `${(seg.duration / totalDuration) * 100}%` }"
+          @click="selectedSegmentId = seg.id">
           <span class="label">{{ formatTime(seg.startTime) }} - {{ formatTime(seg.endTime) }}</span>
           <button class="remove-btn" @click.stop="removeSegment(seg.id)">×</button>
         </div>
@@ -46,41 +28,37 @@
     <div class="toolbar">
       <!-- 选中片段信息 -->
       <div class="selected-info">
-        <span v-if="selectedSegment">
-          选中: {{ selectedSegment.id }} | {{ formatTime(selectedSegment.startTime) }} → {{ formatTime(selectedSegment.endTime) }}
-          <button class="btn btn-clear" @click="selectedSegmentId = null">清除选中</button>
-        </span>
+        <template v-if="selectedSegment">
+          选中: <strong>{{ selectedSegment.id }} </strong>
+          [ {{ formatTime(selectedSegment.startTime) }} → {{ formatTime(selectedSegment.endTime) }} ] 
+
+          <el-divider direction="vertical" />
+
+          <el-button type="info" :disabled="!selectedSegment" @click="goToSegmentStart">
+            跳转到选中片段开始
+          </el-button>
+          <el-button type="info" :disabled="!selectedSegment" @click="goToSegmentEnd">
+            跳转到选中片段结束
+          </el-button>
+
+          <el-divider direction="vertical" />
+
+          <el-button type="danger" @click="cancelSelectedSegment">取消选中</el-button>
+        </template>
         <span v-else>未选中任何片段</span>
       </div>
 
       <!-- 时间轴控制按钮 -->
       <div class="controls">
-        <button class="btn btn-small" @click="goToStart" title="回到最开始">⏮️</button>
-        <button class="btn btn-small" @click="goBackFrame">⏪前一帧</button>
-        <button class="btn btn-play" @click="togglePlayPause" :title="isPlaying ? '暂停' : '播放'">
-          {{ isPlaying ? '⏸️' : '▶️' }}
-        </button>
-        <button class="btn btn-small" @click="goForwardFrame">后一帧⏩</button>
-        <button class="btn btn-small" @click="goToEnd" title="回到最末尾">⏭️</button>
+        <el-button @click="goToStart">回到最开始</el-button>
+        <el-button @click="goBackFrame">⏪前一帧</el-button>
+        <el-button @click="togglePlayPause">
+          {{ isPlaying ? '暂停⏸️' : '播放▶️' }}
+        </el-button>
+        <el-button @click="goForwardFrame">后一帧⏩</el-button>
+        <el-button @click="goToEnd">回到最末尾</el-button>
 
-        <div class="divider"></div>
 
-        <button
-          class="btn btn-small"
-          :disabled="!selectedSegment"
-          @click="goToSegmentStart"
-          title="跳转到选中片段开始"
-        >
-          📍开始
-        </button>
-        <button
-          class="btn btn-small"
-          :disabled="!selectedSegment"
-          @click="goToSegmentEnd"
-          title="跳转到选中片段结束"
-        >
-          📍结束
-        </button>
       </div>
 
       <!-- 标记工具 -->
@@ -92,20 +70,14 @@
           <span v-else>⏳ 请点击“标记开始时间”</span>
         </div>
         <div class="buttons">
-          <button
-            class="btn btn-start"
-            :disabled="currentTime < 0 || currentTime > totalDuration"
-            @click="setStartTime"
-          >
+          <el-button type="primary" :disabled="currentTime < 0 || currentTime > totalDuration"
+            @click="setStartTime">
             标记开始时间
-          </button>
-          <button
-            class="btn btn-end"
-            :disabled="tempStart === null || currentTime <= (tempStart || 0)"
-            @click="setEndTime"
-          >
+          </el-button>
+          <el-button type="success" :disabled="tempStart === null || currentTime <= (tempStart || 0)"
+            @click="setEndTime">
             标记结束时间
-          </button>
+          </el-button>
         </div>
       </div>
     </div>
@@ -150,6 +122,10 @@ const formatTime = (seconds: number): string => {
 
 // 点击时间轴：跳转 + 显示指示线
 const jumpToTime = (e: MouseEvent) => {
+  if ((e.target as HTMLDivElement).className === 'track') {
+    cancelSelectedSegment()
+  }
+
   const rect = timelineRef.value?.getBoundingClientRect();
   if (!rect || totalDuration.value <= 0) return;
 
@@ -165,6 +141,11 @@ const jumpToTime = (e: MouseEvent) => {
   props.onCurrentTimeChange(targetTime);
   clickPosition.value = targetTime;
 };
+
+// 取消选中的片断
+const cancelSelectedSegment = () => {
+  selectedSegmentId.value = null
+}
 
 const setStartTime = () => {
   if (props.currentTime >= 0 && props.currentTime <= totalDuration.value) {
@@ -204,7 +185,7 @@ const removeSegment = (id: string) => {
   if (selectedSegmentId.value === id) selectedSegmentId.value = null;
 };
 
-const getPercent = (time: number): string => {
+const timeToPercent = (time: number): string => {
   if (totalDuration.value <= 0) return '0%';
   return `${Math.max(0, Math.min(100, (time / totalDuration.value) * 100))}%`;
 };
@@ -260,72 +241,79 @@ const goForwardFrame = () => {
   overflow: visible;
 }
 
+// 进度轨道
 .track {
   position: relative;
   height: 100%;
   width: 100%;
-}
-
-.progress {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 4px;
-  background-color: #3b82f6;
-  z-index: 1;
-}
-
-.click-indicator {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background-color: #9ca3af;
-  z-index: 5;
-
-  .triangle-up,
-  .triangle-down {
+  .progress {
     position: absolute;
-    left: 50%;
-    width: 0;
-    height: 0;
-    transform: translate(-50%, 0);
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background-color: rgba(67, 68, 70, 0.8);
+    z-index: 1;
   }
 
-  .triangle-up {
-    top: -0;
-    border-top: 8px solid #9ca3af;
-  }
 
-  .triangle-down {
-    bottom: -0;
-    border-bottom: 8px solid #9ca3af;
-  }
+  // 标记线
+  .indicator-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: #9ca3af;
+    z-index: 5;
+    &::before, &::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      width: 0;
+      height: 0;
+      transform: translate(-50%, 0);
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+    }
 
+
+    &::before {
+      top: -0;
+      border-top: 8px solid #9ca3af;
+    }
+
+    &::after {
+      bottom: -0;
+      border-bottom: 8px solid #9ca3af;
+    }
+
+  }
 }
 
 
-
-.in-point-marker {
+.temp-start-marker {
   position: absolute;
   top: 0;
   height: 100%;
-  width: 2px;
+  width: 1px;
   background-color: #4ade80;
   z-index: 6;
+
+  &::before, &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 10px;
+    height: 1px;
+    background-color: #4ade80;
+  }
+  &::before {
+    top: 0;
+  }
+  &::after {
+    bottom: 0;
+  }
 }
 
-.in-point-marker::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 10px;
-  height: 2px;
-  background-color: #4ade80;
-}
 
 .segment {
   position: absolute;
@@ -384,7 +372,7 @@ const goForwardFrame = () => {
   color: #4b5563;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 6px;
 }
 
 .btn-clear {

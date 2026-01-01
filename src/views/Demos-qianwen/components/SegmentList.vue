@@ -8,7 +8,7 @@
         <span>时长: {{ seg.duration.toFixed(3) }}s</span>
         <span>{{ seg.frames }} frames</span>
         <span>{{ seg.size }}</span>
-        <button @click="onRemove(seg.id)">删除</button>
+        <el-button @click="onRemove(seg.id)">删除</el-button>
       </li>
     </ul>
   </div>
