@@ -14,7 +14,7 @@
     <!-- 新建选区 -->
     <cropper-handle action="select" theme-color="rgba(51, 153, 255, 0.5)" :plain="true" />
 
-    <cropper-selection ref="cropperSelectionRef"
+    <cropper-selection ref="cropperSelectionRef" outlined
         :x="initSelection.x"
         :y="initSelection.y"
         :width="initSelection.width"
@@ -23,6 +23,7 @@
         :initial-aspect-ratio="4/3"
         :movable="true"
         :resizable="true"
+        :precise="true"
         @change="onCropperSelectionChange"
     >
       <!-- 网格 -->
