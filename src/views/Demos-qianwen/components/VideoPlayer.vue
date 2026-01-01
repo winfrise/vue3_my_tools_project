@@ -50,7 +50,13 @@ const handleTimeUpdate = () => {
 };
 
 const handleSelectionChange = (selection) => {
-  const { x: cropX, y: cropY, width: cropWidth, height: cropHeight} = selection
+  const { x, y, width, height} = selection
+
+  const {displayWidth, displayHeight, containerWidth, containerHeight} = videoDisplayInfo
+  const cropX = x / containerWidth
+  const cropY = y / containerHeight
+  const cropWidth = width / displayWidth
+  const cropHeight = height / displayHeight 
   Object.assign(props.selectedSegment!, {cropX, cropY, cropWidth, cropHeight})
 }
 // 暴露 play / pause 方法给父组件
@@ -76,12 +82,20 @@ const setCurrentTime = (currentTime:number) => {
 
 const initSelection = computed(() => {
   const { selectedSegment } =  props
-  return {
-    x: selectedSegment?.cropX,
-    y: selectedSegment?.cropY,
-    width: selectedSegment?.cropWidth,
-    height: selectedSegment?.cropY
-  }
+  const {displayWidth, displayHeight, containerWidth, containerHeight, videoX, videoY} = videoDisplayInfo
+
+
+    const { cropX, cropY, cropWidth, cropHeight} = selectedSegment as Segment
+
+    const x = cropX ? cropX * containerWidth : videoX
+    const y = cropY? cropY * containerHeight : videoY
+    const width = cropWidth ?  cropWidth * displayWidth : displayWidth
+    const height = cropHeight? cropHeight * displayHeight : displayHeight
+
+    return {
+      x, y, width, height
+    }
+
 })
 
 const maxSelection = computed(() => {
@@ -103,6 +117,8 @@ const videoDisplayInfo = reactive({
   videoX: 0,
   displayWidth: 0,
   displayHeight: 0,
+  containerWidth: 0,
+  containerHeight: 0
 })
 const isLoaded = ref(false)
 const handleMetadataLoaded = (event: Event) => {
