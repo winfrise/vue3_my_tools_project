@@ -6,9 +6,6 @@
       :scaleStep="0.1"
       themeColor="#3399ff"
   >
-
-    
-
     <!-- 遮罩效果 -->
     <cropper-shade theme-color="rgba(0, 0, 0, 0.5)" />
     <!-- 新建选区 -->

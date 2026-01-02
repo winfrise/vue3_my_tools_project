@@ -25,9 +25,27 @@
         </template>
       </el-table-column>
 
+      <el-table-column label="裁剪">
+        <template #default="{row}">
+          {{ row.enableCrop ? '是' : '否' }}
+        </template>
+      </el-table-column>
+
+      <el-table-column label="裁剪坐标">
+        <template #default="{row}">
+          x:{{ row.cropX }}px / y: {{ row.cropY }}
+        </template>
+      </el-table-column>
+
+      <el-table-column label="裁剪宽高">
+        <template #default="{row}">
+          宽:{{ row.cropWidth }}px / 高: {{ row.cropHeight }}
+        </template>
+      </el-table-column>
+
       <el-table-column label="大小" prop="size"></el-table-column>
 
-      <el-table-column label="操作">
+      <el-table-column label="操作" width="200px">
         <template #default="{row}">
           <el-button size="small" type="primary" @click="copySingleCmd(row)">复制命令</el-button>
           <el-button size="small" type="danger" @click="onRemove(row.id)">删除</el-button>
