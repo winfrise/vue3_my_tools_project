@@ -17,9 +17,32 @@
         <!-- 已保存片段 -->
         <div v-for="seg in segments" :key="seg.id" class="segment" :class="{ 'selected': seg.id === selectedSegmentId }"
           :style="{ left: timeToPercent(seg.startTime), width: `${(seg.duration / totalDuration) * 100}%` }"
-          @click="selectedSegment = seg">
+          @click="selectedSegment = seg"
+        >
           <span class="label">{{ formatTime(seg.startTime) }} - {{ formatTime(seg.endTime) }}</span>
-          <button class="remove-btn" @click.stop="removeSegment(seg.id)">×</button>
+          
+          <!-- 删除按钮 -->
+          <button class="remove-btn" @click.stop="removeSegment(seg.id)">×</button>            ✏️
+
+
+          <!-- 左右 resize 手柄（仅在编辑状态显示） -->
+          <template v-if="seg.id === editingSegmentId">
+            <div 
+              class="resize-handle left" 
+              @mousedown.stop="startResize(seg, 'start', $event)"
+            ></div>
+            <div 
+              class="resize-handle right" 
+              @mousedown.stop="startResize(seg, 'end', $event)"
+            ></div>
+            
+            <!-- 整体拖动区域（覆盖整个 segment） -->
+            <div 
+              class="drag-overlay" 
+              @mousedown.stop="startDrag(seg, $event)"
+            ></div>
+          </template>
+
         </div>
       </div>
     </div>
@@ -53,6 +76,10 @@
           <el-divider direction="vertical" />
 
           <el-button type="danger" @click="cancelSelectedSegment">取消选中</el-button>
+
+          <el-button :disabled="!selectedSegment"
+            @click="toggleEdit(selectedSegment!.id)"
+          >{{ editingSegmentId ? '取消调整' : '调整' }}</el-button>
         </div>
       </div>
 
@@ -238,6 +265,139 @@ const goForwardFrame = () => {
   const newTime = Math.min(totalDuration.value, props.currentTime + frameDuration);
   props.onCurrentTimeChange(newTime);
 };
+
+// 新增状态
+const editingSegmentId = ref<string | null>(null);
+
+// 处理 segment 点击（避免与 edit 按钮冲突）
+const handleSegmentClick = (seg: Segment, e: MouseEvent) => {
+  // 如果点击的是 edit/remove 按钮，不触发选中
+  const target = e.target as HTMLElement;
+  if (target.classList.contains('edit-btn') || target.classList.contains('remove-btn')) {
+    return;
+  }
+  selectedSegment.value = seg;
+};
+
+// 切换编辑模式
+const toggleEdit = (id: string) => {
+  if (editingSegmentId.value === id) {
+    editingSegmentId.value = null; // 退出编辑
+  } else {
+    editingSegmentId.value = id;   // 进入编辑
+  }
+};
+
+// ===== 拖拽调整起止时间（已有逻辑，略作优化）=====
+const resizingSegment = ref<{ id: string; type: 'start' | 'end' } | null>(null);
+const initialX = ref(0);
+const initialTime = ref(0);
+
+const startResize = (seg: Segment, type: 'start' | 'end', e: MouseEvent) => {
+  e.preventDefault();
+  resizingSegment.value = { id: seg.id, type };
+  initialX.value = e.clientX;
+  initialTime.value = type === 'start' ? seg.startTime : seg.endTime;
+
+  window.addEventListener('mousemove', onResize);
+  window.addEventListener('mouseup', stopResize);
+};
+
+const onResize = (e: MouseEvent) => {
+  if (!resizingSegment.value || !timelineRef.value || totalDuration.value <= 0) return;
+
+  const rect = timelineRef.value.getBoundingClientRect();
+  const deltaX = e.clientX - initialX.value;
+  const deltaPercent = deltaX / rect.width;
+  const deltaTime = deltaPercent * totalDuration.value;
+  let newTime = initialTime.value + deltaTime;
+
+  newTime = Math.max(0, Math.min(totalDuration.value, newTime));
+
+  const segId = resizingSegment.value.id;
+  const seg = props.segments.find(s => s.id === segId);
+  if (!seg) return;
+
+  let updatedSeg: Segment;
+  if (resizingSegment.value.type === 'start') {
+    const newStart = Math.min(newTime, seg.endTime - 0.01);
+    updatedSeg = { ...seg, startTime: newStart, duration: seg.endTime - newStart };
+  } else {
+    const newEnd = Math.max(newTime, seg.startTime + 0.01);
+    updatedSeg = { ...seg, endTime: newEnd, duration: newEnd - seg.startTime };
+  }
+
+  const updatedSegments = props.segments.map(s =>
+    s.id === segId ? updatedSeg : s
+  );
+  props.onSegmentChange(updatedSegments);
+};
+
+const stopResize = () => {
+  resizingSegment.value = null;
+  window.removeEventListener('mousemove', onResize);
+  window.removeEventListener('mouseup', stopResize);
+};
+
+// ===== 新增：整体拖动逻辑 =====
+const draggingSegment = ref<string | null>(null);
+const dragOffset = ref(0); // 鼠标相对于 segment 左边缘的偏移（百分比）
+
+const startDrag = (seg: Segment, e: MouseEvent) => {
+  e.preventDefault();
+  draggingSegment.value = seg.id;
+
+  const rect = timelineRef.value?.getBoundingClientRect();
+  if (!rect) return;
+
+  const segmentLeftPx = (seg.startTime / totalDuration.value) * rect.width;
+  const mouseInTimeline = e.clientX - rect.left;
+  dragOffset.value = (mouseInTimeline - segmentLeftPx) / rect.width; // 相对位置 [0~1]
+
+  window.addEventListener('mousemove', onDrag);
+  window.addEventListener('mouseup', stopDrag);
+};
+
+const onDrag = (e: MouseEvent) => {
+  if (!draggingSegment.value || !timelineRef.value || totalDuration.value <= 0) return;
+
+  const rect = timelineRef.value.getBoundingClientRect();
+  const mouseInTimeline = e.clientX - rect.left;
+  const percent = (mouseInTimeline / rect.width) - dragOffset.value;
+  const newStartTime = Math.max(0, Math.min(totalDuration.value - 0.01, percent * totalDuration.value));
+  const newEndTime = newStartTime + props.segments.find(s => s.id === draggingSegment.value)!.duration;
+
+  // 边界：不能超出 [0, totalDuration]
+  if (newEndTime > totalDuration.value) {
+    const overflow = newEndTime - totalDuration.value;
+    const finalStartTime = newStartTime - overflow;
+    updateSegmentPosition(draggingSegment.value, finalStartTime);
+  } else {
+    updateSegmentPosition(draggingSegment.value, newStartTime);
+  }
+};
+
+const updateSegmentPosition = (id: string, newStartTime: number) => {
+  const seg = props.segments.find(s => s.id === id);
+  if (!seg) return;
+
+  const newSeg = {
+    ...seg,
+    startTime: newStartTime,
+    endTime: newStartTime + seg.duration
+  };
+
+  const updatedSegments = props.segments.map(s =>
+    s.id === id ? newSeg : s
+  );
+  props.onSegmentChange(updatedSegments);
+};
+
+const stopDrag = () => {
+  draggingSegment.value = null;
+  window.removeEventListener('mousemove', onDrag);
+  window.removeEventListener('mouseup', stopDrag);
+};
 </script>
 
 <style lang="scss" scoped>
@@ -347,13 +507,77 @@ const goForwardFrame = () => {
   box-sizing: border-box;
   z-index: 2;
   cursor: pointer;
+
+  &:hover,
+  &.selected {
+    background-color: rgba(59, 130, 246, 0.4);
+    border-color: #1d4ed8;
+  }
+
+  // 调整按钮
+  .edit-btn {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 16px;
+    height: 16px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+  }
+
+  // 编辑状态下的手柄
+  &.editing {
+    .resize-handle {
+      opacity: 1 !important;
+    }
+  }
+
+  // Resize 手柄（默认隐藏）
+  .resize-handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    cursor: col-resize;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.2s;
+
+    &.left {
+      left: -3px;
+      background: linear-gradient(to right, transparent, rgba(255,255,255,0.7), transparent);
+    }
+    &.right {
+      right: -3px;
+      background: linear-gradient(to left, transparent, rgba(255,255,255,0.7), transparent);
+    }
+  }
+
+  // 拖动覆盖层（透明但可捕获事件）
+  .drag-overlay {
+    position: absolute;
+    top: 0;
+    left: 6px;   // 避开左右手柄
+    right: 6px;
+    bottom: 0;
+    cursor: grab;
+    z-index: 9;
+  }
+
+  &:active .drag-overlay {
+    cursor: grabbing;
+  }
 }
 
-.segment:hover,
-.segment.selected {
-  background-color: rgba(59, 130, 246, 0.4);
-  border-color: #1d4ed8;
-}
+
 
 .remove-btn {
   position: absolute;

@@ -1,6 +1,6 @@
 <template>
   <div class="video-player" ref="videoContainer">
-    <video controls
+    <video :controls="false"
       ref="videoRef"
       :src="props.videoInfo?.url || ''"
       @timeupdate="handleTimeUpdate"

@@ -28,7 +28,7 @@
 
       <!-- 十字准线 -->
       <cropper-crosshair :centered="true" themeColor="rgba(0, 0, 0, 0.5)" />
-        <cropper-handle action="move" theme-color="rgba(255, 255, 255, 0.35)" />
+        <cropper-handle action="move" theme-color="rgba(255, 255, 255, 0)" />
         <cropper-handle action="n-resize" theme-color="#3399ff" />
         <cropper-handle action="e-resize" theme-color="#3399ff" />
         <cropper-handle action="s-resize" theme-color="#3399ff" />
