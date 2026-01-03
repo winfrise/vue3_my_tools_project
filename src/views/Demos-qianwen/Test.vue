@@ -2,23 +2,39 @@
     <el-card>
         <CustomVideoUpload v-model:videoInfo="videoInfo" />
     </el-card>
+{{ segments }}
+{{ selection }}
+    <el-container>
+        <el-main>
+            <el-card>
+                <div class="video-wrapper">
+                    <CustomVideoPlayer ref="videoPlayerRef" 
+                        :videoUrl="videoInfo?.url" 
+                        @loaded-meta-data="data => videoDisplayInfo = data" 
+                    />
+                    <CustomVideoCropper class="video-cropper" @update:selection="data => selection = data" />
+                </div>
+            </el-card>
+            <el-card>
+                <CustomTimeLine ref="timeLineRef" 
+                    :video-duration="videoInfo?.duration || 0" 
+                    v-model:current-time="currentTime"   
+                    :segments="segments"
+                    :selectedSegmentId="selectedSegmentId"
+                />
+            </el-card>
+            <el-card>
+                <CustomVideoTools v-on="toolHandlers" />
+            </el-card>
+        </el-main>
 
-    <el-card>
-        <div class="video-wrapper">
-            <CustomVideoPlayer ref="videoPlayerRef" 
-                :videoUrl="videoInfo?.url" 
-                @loaded-meta-data="data => videoDisplayInfo = data" 
-            />
-            <CustomVideoCropper class="video-cropper" @update:selection="data => selection = data" />
-        </div>
-    </el-card>
-    <el-card>
-        {{ currentTime }}
-        <CustomTimeLine ref="timeLineRef" :duration="videoInfo?.duration || 0" v-model:current-time="currentTime" />
-    </el-card>
-    <el-card>
-        <CustomVideoTools v-on="toolHandlers" />
-    </el-card>
+        <el-aside width="250px">
+            <CustomSegementList :segments="segments" :selectedSegmentId="selectedSegmentId" />
+        </el-aside>
+    </el-container>
+
+
+
 </template>
 
 <script setup lang="ts">
@@ -30,6 +46,7 @@ import CustomVideoPlayer from './components-custom/CustomVideoPlayer.vue'
 import CustomVideoCropper from './components-custom/CustomVideoCropper.vue';
 import CustomVideoTools from './components-custom/CustomVideoTools.vue'
 import CustomTimeLine from './components-custom/CustomTimeLine.vue';
+import CustomSegementList from './components-custom/CustomSegementList.vue';
 
 import { watch } from 'vue'
 
@@ -38,6 +55,9 @@ const timeLineRef = ref()
 const videoInfo = ref<VideoInfo | null>(null)
 const videoDisplayInfo = ref<VideoDisplayInfo>()
 const selection = ref<Selection | undefined>()
+
+const segments = ref([]) // 视频片断列表
+const selectedSegmentId = ref()
 
 const currentTime = ref<number>(0)
 watch(currentTime, () => {

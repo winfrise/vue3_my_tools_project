@@ -16,9 +16,9 @@
       </template>
     </BasicContextMenu>
 
-    <BasicStartMarker v-if="startMarker" :offset-x="startMarker / props.duration * 100" />
+    <BasicStartMarker v-if="startMarker" :offset-x="startMarker / props.videoDuration * 100" />
 
-    <BasicSegment v-for="seg in segments" :key="seg.id" :seg="seg" :duration="props.duration" />
+    <BasicSegment v-for="seg in props.segments" :key="seg.id" :seg="seg" :duration="props.videoDuration" />
   </div>
 </template>
 
@@ -32,8 +32,10 @@ import { Segment } from '../types/custom'
 import { ref, computed } from 'vue'
 
 interface Props {
-    duration: number,
+    videoDuration: number,
     currentTime: number,
+    segments: Segment[],
+    selectedSegmentId: string
 }
 
 const props = defineProps<Props>()
@@ -44,7 +46,7 @@ const emit = defineEmits<{
     
 // 计算当前应显示的百分比
 const innerPercent = computed(() => {
-    return Math.max(0, Math.min(100, props.currentTime / props.duration * 100))
+    return Math.max(0, Math.min(100, props.currentTime / props.videoDuration * 100))
 })
 
 // 👇 关键：点击时，根据模式决定如何更新
@@ -54,7 +56,7 @@ const handleClick = (e: MouseEvent) => {
   if (rect.width <= 0) return
 
   const clickX = e.clientX - rect.left
-  const newCurrentTime = (clickX / rect.width) * props.duration
+  const newCurrentTime = (clickX / rect.width) * props.videoDuration
   const clamped = Math.max(0, Math.min(100, newCurrentTime))
 
   emit('update:currentTime', clamped)
@@ -62,7 +64,6 @@ const handleClick = (e: MouseEvent) => {
 
 
 const startMarker = ref<number| null>(null)
-const segments = ref<Segment[]>([])
 
 const markStartPosition  = () => {
   startMarker.value = props.currentTime
@@ -87,7 +88,7 @@ const markEndPosition = () => {
     endTime: endMark,
   };
 
-  segments.value.push(newSegment)
+  props.segments.push(newSegment)
   startMarker.value = null;
 }
 
