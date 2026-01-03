@@ -14,12 +14,15 @@ export interface VideoMetadata {
 }
 
 export interface VideoDisplayInfo {
-  offsetX: number,
-  offsetY: number,
+  displayX: number,
+  displayY: number,
   displayWidth: number,
   displayHeight: number,
   containerWidth: number,
-  containerHeight: number
+  containerHeight: number,
+  scaleRatio: number,
+  videoWidth: number,
+  videoHeight: number,
 }
 
 export interface SelectionOptions {

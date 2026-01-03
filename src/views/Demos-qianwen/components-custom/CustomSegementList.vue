@@ -2,6 +2,7 @@
     <el-card>
         <template #header>
             <h3>片段列表 (共{{ props.segments.length }}个)</h3>
+            <el-button type="primary" @click="copyBatchCmd">复制批量命令</el-button>
         </template>
 
         <div v-if="props.segments.length === 0" class="no-segment-tip">
@@ -12,14 +13,11 @@
             v-for="(seg, idx) in props.segments" 
             :key="seg.id"
             :class="{ active: props.selectedSegmentId === seg.id }" 
-            @click="selectSegment(idx)"
         >
 
             <p class="segment-item-header">
                 <strong>片段 {{ idx + 1 }}</strong>
-
-                <el-button size="small" type="danger" :icon="Delete" @click.stop="deleteSegment(idx)"
-                    style="margin-left: 10px;"></el-button>
+                <el-button size="small" type="primary" @click="copySingleCmd(seg)">复制命令</el-button>
             </p>
   
             <p class="time-item">
@@ -30,6 +28,11 @@
             <p class="time-item">
                 <label>结束时间：</label>
                 <el-input-number v-model="seg.endTime" :min="seg.startTime + 0.01" :step="0.1"></el-input-number>
+            </p>
+
+            <p>
+                <label>时长：</label>
+                <span>{{ formatTime(seg.startTime) }} - {{ formatTime(seg.endTime) }}</span>
             </p>
 
             <p>
@@ -57,36 +60,7 @@
                     <el-input-number v-model="seg.cropY" :min="0" :step="1"></el-input-number>
                 </p>
             </div>
-
-            <div class="cmd-generator">
-                <el-button type="info" :icon="DocumentCopy" @click.stop="copySingleCmd(idx)">复制命令</el-button>
-
-                <!-- <div v-if="seg.ffmpegCmd" class="cmd-display">
-                  <el-tag type="info">FFmpeg 命令</el-tag>
-                  <pre>{{ seg.ffmpegCmd }}</pre>
-                </div> -->
-            </div>
         </div>
-
-
-        <!-- <el-card v-if="segmentStore.segments.length > 0">
-            <div class="batch-cmd-header">
-              <el-button 
-                type="info" 
-                :icon="CopyDocument"
-                @click="copyBatchCmd"
-              >复制批量截取命令</el-button>
-            </div>
-            <div v-if="segmentStore.batchCmds" class="batch-cmd-display">
-              <el-tag type="success">批量截取 FFmpeg 命令</el-tag>
-              <pre>{{ segmentStore.batchCmds }}</pre>
-            </div>
-          </el-card> -->
-
-
-
-
-        <template #footer>Footer content</template>
     </el-card>
 
 </template>
@@ -94,55 +68,120 @@
 <script lang="ts" setup>
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { CopyDocument, DocumentCopy, Delete } from '@element-plus/icons-vue'
-import { Segment } from '../types/custom';
+import { Segment, VideoDisplayInfo, VideoInfo } from '../types/custom';
+import dayjs from 'dayjs';
 
 interface Props {
     segments: Segment[],
-    selectedSegmentId: string | null
+    videoInfo: VideoInfo | null,
+    selectedSegmentId: string | null,
+    videoDisplayInfo: VideoDisplayInfo | null
 }
 
 const props = defineProps<Props>()
-
-const selectSegment = (idx: number) => {
-    //   segmentStore.selectSegment(idx);
-    //   const seg = segmentStore.segments[idx];
-    // //   videoRef.value.currentTime = seg.startTime;
-    //   videoStore.currentTime = seg.startTime;
-    //   ElMessage.info(`已选中片段 ${idx + 1}，视频已跳转到片段开始位置`);
-};
-
-
-const deleteSegment = async (idx: number) => {
-    const confirm = await ElMessageBox.confirm('确定删除该片段吗？', '提示', {
-        type: 'warning',
-    });
-    if (confirm) {
-        // segmentStore.deleteSegment(idx);
-        ElMessage.success('片段已删除');
-    }
-};
+// 时间格式化
+const formatTime = (seconds: number): string => {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
 
 
 // 命令复制
-const copySingleCmd = async (idx: number) => {
-    // const cmd = segmentStore.generateSingleCmd(idx);
-    // if (cmd) {
-    //   const success = await store.copyToClipboard(cmd);
-    //   if (success) {
-    //     ElMessage.success('命令已成功复制到剪贴板！');
-    //   }
-    // }
+const copySingleCmd = async (seg:Segment) => {
+    const { videoInfo  } = props
+    if (!videoInfo) return
+    const cmd = generateSingleCmd(seg, videoInfo.filename);
+    if (cmd) {
+        const success = await copyToClipboard(cmd);
+        if (success) {
+        ElMessage.success('命令已成功复制到剪贴板！');
+        }
+    }
 };
 
 const copyBatchCmd = async () => {
-    // const cmd = segmentStore.generateBatchCmd();
-    // if (cmd) {
-    //   const success = await store.copyToClipboard(cmd);
-    //   if (success) {
-    //     ElMessage.success('批量命令已成功复制到剪贴板！');
-    //   }
-    // }
+    const { videoInfo  } = props
+    const cmd = generateBatchCmd(props.segments, videoInfo?.filename);
+    if (cmd) {
+        const success = await copyToClipboard(cmd);
+        if (success) {
+        ElMessage.success('批量命令已成功复制到剪贴板！');
+        }
+    }
 };
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (err) {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      return true;
+    }
+  }
+
+
+  // 生成单个命令
+  const generateSingleCmd = (segment: Segment, filename:string) => {
+    const { videoDisplayInfo } = props
+    const { id, startTime, endTime, enableCrop, cropWidth, cropHeight, cropX, cropY} = segment 
+    const fileExt= 'mp4'
+    const dateTimeStr = dayjs().format('YYYY-MM-DD HH:mm:ss');
+    const outputFile = `output_${dateTimeStr}_${id}.${fileExt}`;
+
+    let videoFilter = ''
+    if (enableCrop) {
+      const { scaleRatio, displayX, displayY } = videoDisplayInfo as VideoDisplayInfo
+      const width = cropWidth as number / scaleRatio
+      const height = cropHeight as number / scaleRatio
+      const x = (cropX as number - displayX) / scaleRatio
+      const y = (cropY as number - displayY) /scaleRatio
+      videoFilter = ` -filter:v "crop=${width}:${height}:${x}:${y}"`
+    }
+
+    let cmd = `ffmpeg -ss ${startTime} -to ${endTime} -i "${filename}" ${videoFilter} -c:a copy "${outputFile}"`;
+    return cmd;
+  };
+
+
+  // 生成批量任务
+  const generateBatchCmd = (segments, filename) => {
+    if (!segments.length) return '';
+    const fileExt = 'mp4'
+    const dateTimeStr = dayjs().format('YYYY-MM-DD HH:mm:ss');
+
+
+    let filterComplex = '';
+    let mapOutputs = '';
+
+    segments.forEach((seg, idx) => {
+      const { id, startTime, endTime, enableCrop, cropWidth, cropHeight, cropX, cropY} = seg 
+
+      let videoFilter = `trim=start=${startTime.toFixed(1)}:end=${seg.endTime.toFixed(1)},setpts=PTS-STARTPTS`;
+      // 关键：使用原始视频像素的裁剪参数
+      if (enableCrop) {
+        videoFilter += `,crop=${cropWidth}:${cropHeight}:${cropX}:${cropY}`;
+      }
+
+      filterComplex += `[0:v]${videoFilter}[v${idx}];[0:a]atrim=start=${startTime.toFixed(1)}:end=${endTime.toFixed(1)},asetpts=PTS-STARTPTS[a${idx}];`;
+      const outputFile = `output_${dateTimeStr}_${id}.${fileExt}`;
+      mapOutputs += ` -map '[v${idx}]' -map '[a${idx}]' "${outputFile}"`;
+
+    });
+
+    filterComplex = filterComplex.replace(/;$/, '');
+    // 修复：移除 -c:v copy，裁剪需要重新编码
+    const batchCmd = `ffmpeg -i "${filename}" -filter_complex '${filterComplex}'${mapOutputs} -c:a copy`;
+
+    return batchCmd;
+  };
+
 
 </script>
 

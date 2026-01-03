@@ -45,7 +45,10 @@
         </el-main>
 
         <el-aside width="320px">
-            <CustomSegementList :segments="segments" :selectedSegmentId="selectedSegmentId" />
+            <CustomSegementList :segments="segments" :selectedSegmentId="selectedSegmentId" 
+                :video-info="videoInfo"
+                :video-display-info="videoDisplayInfo"
+            />
         </el-aside>
     </el-container>
 
@@ -65,7 +68,7 @@ import CustomSegementList from './components-custom/CustomSegementList.vue';
 const videoPlayerRef = ref()
 const timeLineRef = ref()
 const videoInfo = ref<VideoInfo | null>(null)
-const videoDisplayInfo = ref<VideoDisplayInfo>()
+const videoDisplayInfo = ref<VideoDisplayInfo | null>(null)
 const isPlaying = ref<boolean>(false)
 
 const segments = ref<Segment[]>([]) // 视频片断列表
@@ -78,10 +81,10 @@ const selectedSegment = computed(() => {
 const maxSelection = computed(() => {
     if (!videoDisplayInfo) return null
     return {
-        cropX: videoDisplayInfo.value?.offsetX, 
-        cropY: videoDisplayInfo.value?.offsetY,
-        cropWidth: videoDisplayInfo.value?.displayWidth,
-        cropHeight: videoDisplayInfo.value?.displayHeight,
+        cropX: videoDisplayInfo.value!.displayX, 
+        cropY: videoDisplayInfo.value!.displayY,
+        cropWidth: videoDisplayInfo.value!.displayWidth,
+        cropHeight: videoDisplayInfo.value!.displayHeight,
     }
 })
 

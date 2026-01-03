@@ -4,7 +4,10 @@
             left: `${offsetX}%`,
             width: `${offsetWidth}%`
         }"
-    ></div>
+    >
+        <div class="label">{{ props.seg.startTime }}~{{ props.seg.endTime }}</div>
+        <div class="duration">{{ props.seg.endTime - props.seg.startTime }}s</div>
+    </div>
 </template>
 
 <script setup lang="ts">

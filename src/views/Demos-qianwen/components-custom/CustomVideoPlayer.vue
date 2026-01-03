@@ -49,17 +49,20 @@ const handleLoadedMetaData = (e : Event) => {
 
   // 3. 计算位置 (居中显示)
   // 在容器中水平垂直居中
-  const offsetX = (containerWidth - displayWidth) / 2
-  const offsetY = (containerHeight - displayHeight) / 2
+  const displayX = (containerWidth - displayWidth) / 2
+  const displayY = (containerHeight - displayHeight) / 2
 
 
   videoDisplayInfo.value = {
-    offsetX,
-    offsetY,
+    displayX,
+    displayY,
     displayWidth,
     displayHeight,
     containerWidth,
     containerHeight,
+    scaleRatio,
+    videoWidth,
+    videoHeight,
   }
   emit('loadedMetaData', videoDisplayInfo.value)
 }
