@@ -11,10 +11,10 @@
     <cropper-handle action="select" theme-color="rgba(51, 153, 255, 0.5)" :plain="true" />
 
     <cropper-selection ref="cropperSelectionRef" outlined
-        :x="selection?.cropX"
-        :y="selection?.cropY"
-        :width="selection?.cropWidth"
-        :height="selection?.cropHeight"
+        :x="initSelection?.cropX"
+        :y="initSelection?.cropY"
+        :width="initSelection?.cropWidth"
+        :height="initSelection?.cropHeight"
         :initial-aspect-ratio="4/3"
         :movable="true"
         :resizable="true"
@@ -53,6 +53,8 @@
     }
 
     const props = defineProps<Props>();
+
+    const initSelection = ref(props.selection)
 
     const emit = defineEmits<{
         (e: 'update:selection', data: Selection):void

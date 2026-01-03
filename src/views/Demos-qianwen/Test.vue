@@ -30,7 +30,8 @@
                     :video-duration="videoInfo?.duration || 0" 
                     v-model:current-time="currentTime"   
                     :segments="segments"
-                    v-model:selectedSegmentId="selectedSegmentId"
+                    :selectedSegmentId="selectedSegmentId"
+                    @update:selectedSegmentId="updateSelectedSegmentId"
                 />
             </el-card>
             <el-card>
@@ -46,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch, nextTick } from 'vue'
 import { VideoInfo, VideoDisplayInfo, Selection, Segment } from './types/custom'
 
 import CustomVideoUpload from './components-custom/CustomVideoUpload.vue';
@@ -56,8 +57,6 @@ import CustomVideoTools from './components-custom/CustomVideoTools.vue'
 import CustomTimeLine from './components-custom/CustomTimeLine.vue';
 import CustomSegementList from './components-custom/CustomSegementList.vue';
 
-import { watch } from 'vue'
-
 const videoPlayerRef = ref()
 const timeLineRef = ref()
 const videoInfo = ref<VideoInfo | null>(null)
@@ -65,14 +64,15 @@ const videoDisplayInfo = ref<VideoDisplayInfo>()
 
 const segments = ref<Segment[]>([]) // 视频片断列表
 const selectedSegmentId = ref()
-const selectedSegment = computed({
-    get () {
-        return segments.value.find(item=> item.id === selectedSegmentId.value)
-    },
-    set(data : Selection) {
-
-    }
+const selectedSegment = computed(() => {
+    return segments.value.find(item=> item.id === selectedSegmentId.value)
 })
+
+const updateSelectedSegmentId = async (val) => {
+    selectedSegmentId.value = null
+    await nextTick()
+    selectedSegmentId.value = val
+}
 
 const currentTime = ref<number>(0)
 watch(currentTime, () => {
