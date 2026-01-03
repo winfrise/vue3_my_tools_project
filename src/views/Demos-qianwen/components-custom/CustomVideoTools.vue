@@ -20,6 +20,30 @@
         设置片断开始
     </el-button>
 
+            <select 
+                v-model.number="selectionOptions.aspectRatio"
+            >
+                <option :value="undefined">
+                Free
+                </option>
+                <option :value="16/9">
+                16:9
+                </option>
+                <option :value="4/3">
+                4:3
+                </option>
+                <option :value="1">
+                1:1
+                </option>
+                <option :value="3/4">
+                3:4
+                </option>
+                <option :value="9/16">
+                9:16
+                </option>
+            </select>
+
+
     <el-button @click="togglePlayPause">
         <el-icon v-if="props.isPlaying" size="24"><VideoPause /></el-icon>
         <el-icon v-else size="24"><VideoPlay/></el-icon>
@@ -43,15 +67,19 @@
         视频尾
         <el-icon><ArrowRight /></el-icon>
     </el-button>
+
+
 </div>
 
 </template>
 
 <script lang="ts" setup>
 import { VideoPlay, VideoPause, ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
+import { SelectionOptions } from '../types/custom';
 
 interface Props {
-    isPlaying: boolean
+    isPlaying: boolean,
+    selectionOptions: SelectionOptions
 }
 const props = defineProps<Props>()
 

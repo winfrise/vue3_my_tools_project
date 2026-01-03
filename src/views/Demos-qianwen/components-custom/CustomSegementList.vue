@@ -32,7 +32,7 @@
 
             <p>
                 <label>时长：</label>
-                <span>{{ formatTime(seg.startTime) }} - {{ formatTime(seg.endTime) }}</span>
+                <span>{{ formatTime(seg.endTime - seg.startTime) }}</span>
             </p>
 
             <p>
@@ -80,12 +80,24 @@ interface Props {
 
 const props = defineProps<Props>()
 // 时间格式化
-const formatTime = (seconds: number): string => {
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
-}
+function formatTime(seconds: number): string {
+  if (isNaN(seconds) || seconds < 0) {
+    return '0秒'
+  }
 
+  const totalSeconds = Math.round(seconds)
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const secs = totalSeconds % 60
+
+  if (hours > 0) {
+    return `${hours}小时${minutes}分${secs}秒`
+  } else if (minutes > 0) {
+    return `${minutes}分${secs}秒`
+  } else {
+    return `${secs}秒`
+  }
+}
 
 // 命令复制
 const copySingleCmd = async (seg:Segment) => {

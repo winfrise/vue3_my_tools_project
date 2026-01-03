@@ -16,6 +16,7 @@
         :width="initSelection?.cropWidth"
         :height="initSelection?.cropHeight"
         :initial-aspect-ratio="4/3"
+        :aspect-ratio="selectionOptions.aspectRatio"
         :movable="true"
         :resizable="true"
         :precise="true"
@@ -51,6 +52,7 @@
     interface Props {
       initSelection: Selection | null,
       maxSelection: Selection | null,
+      selectionOptions: SelectionOptions
     }
 
     const props = defineProps<Props>();

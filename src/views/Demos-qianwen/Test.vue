@@ -16,6 +16,7 @@
                     />
                     <CustomVideoCropper class="video-cropper" 
                         v-if="selectedSegmentId && selectedSegment?.enableCrop"
+                        :selectionOptions="selectionOptions"
                         :maxSelection="maxSelection"
                         :initSelection="selectedSegment.cropX && selectedSegment.cropY && selectedSegment.cropWidth && selectedSegment.cropHeight 
                             ? {
@@ -40,7 +41,7 @@
                 />
             </el-card>
             <el-card>
-                <CustomVideoTools :is-playing="isPlaying" v-on="toolHandlers" />
+                <CustomVideoTools :is-playing="isPlaying" :selectionOptions="selectionOptions"  v-on="toolHandlers" />
             </el-card>
         </el-main>
 
@@ -55,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, nextTick } from 'vue'
+import { computed, ref, reactive, nextTick } from 'vue'
 import { VideoInfo, VideoDisplayInfo, Selection, Segment } from './types/custom'
 
 import CustomVideoUpload from './components-custom/CustomVideoUpload.vue';
@@ -77,6 +78,10 @@ const selectedSegment = computed(() => {
     return segments.value.find(item=> item.id === selectedSegmentId.value)
 })
 
+
+  const selectionOptions = reactive({
+    aspectRatio: undefined
+  })
 
 const maxSelection = computed(() => {
     if (!videoDisplayInfo) return null

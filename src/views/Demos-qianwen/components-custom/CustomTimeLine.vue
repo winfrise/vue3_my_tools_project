@@ -20,6 +20,7 @@
 
     <BasicSegment v-for="seg in props.segments" :key="seg.id" :seg="seg" :duration="props.videoDuration" 
       @click="emit('update:selectedSegmentId', seg.id)"
+      @update:seg="updateSeg(seg.id, $event)"
     />
   </div>
 </template>
@@ -52,6 +53,15 @@ const emit = defineEmits<{
 const innerPercent = computed(() => {
     return Math.max(0, Math.min(100, props.currentTime / props.videoDuration * 100))
 })
+
+
+// 这种写法不推荐
+const updateSeg = (id: string, newSeg: Segment) => {
+  const index = props.segments.findIndex(s => s.id === id)
+  if (index >= 0) {
+    props.segments[index] = newSeg
+  }
+}
 
 // 👇 关键：点击时，根据模式决定如何更新
 const handleClick = (e: MouseEvent) => {
