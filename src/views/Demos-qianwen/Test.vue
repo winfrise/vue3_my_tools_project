@@ -2,8 +2,9 @@
     <el-card>
         <CustomVideoUpload v-model:videoInfo="videoInfo" />
     </el-card>
-{{ selectedSegment }}
-{{ selectedSegmentId }}
+    {{ selectedSegmentId }}
+    {{ selectedSegment }}
+
     <el-container>
         <el-main>
             <el-card>
@@ -12,7 +13,16 @@
                         :videoUrl="videoInfo?.url" 
                         @loaded-meta-data="data => videoDisplayInfo = data" 
                     />
-                    <CustomVideoCropper class="video-cropper" @update:selection="data =>  Object.assign(selectedSegment!, {...data})" />
+                    <CustomVideoCropper class="video-cropper" 
+                        v-if="selectedSegmentId && selectedSegment?.enableCrop"
+                        :selection="{
+                            cropX: selectedSegment.cropX, 
+                            cropY: selectedSegment.cropY,
+                            cropWidth: selectedSegment.cropWidth,
+                            cropHeight: selectedSegment.cropHeight
+                        }"
+                        @update:selection="data =>  Object.assign(selectedSegment!, {...data})" 
+                    />
                 </div>
             </el-card>
             <el-card>

@@ -44,7 +44,7 @@ const props = defineProps<Props>()
 
 const emit = defineEmits<{
   (e: 'update:currentTime', value: number): void
-  (e: 'update:selectedSegmentId', value: string) : void
+  (e: 'update:selectedSegmentId', value: string | null) : void
 }>()
     
 // 计算当前应显示的百分比
@@ -55,6 +55,10 @@ const innerPercent = computed(() => {
 // 👇 关键：点击时，根据模式决定如何更新
 const handleClick = (e: MouseEvent) => {
   const el = e.currentTarget as HTMLElement
+  const target = e.target as HTMLElement
+  if (el === target) {
+    emit('update:selectedSegmentId', null)
+  }
   const rect = el.getBoundingClientRect()
   if (rect.width <= 0) return
 

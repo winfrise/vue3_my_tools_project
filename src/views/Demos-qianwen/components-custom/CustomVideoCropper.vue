@@ -11,6 +11,10 @@
     <cropper-handle action="select" theme-color="rgba(51, 153, 255, 0.5)" :plain="true" />
 
     <cropper-selection ref="cropperSelectionRef" outlined
+        :x="selection?.cropX"
+        :y="selection?.cropY"
+        :width="selection?.cropWidth"
+        :height="selection?.cropHeight"
         :initial-aspect-ratio="4/3"
         :movable="true"
         :resizable="true"
@@ -45,7 +49,7 @@
 
 
     interface Props {
-
+      selection: Selection
     }
 
     const props = defineProps<Props>();
