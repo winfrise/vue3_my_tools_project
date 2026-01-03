@@ -5,7 +5,7 @@
 
     <el-card>
         <div class="video-wrapper">
-            <CustomVideoPlayer ref="videoPlayer" 
+            <CustomVideoPlayer ref="videoPlayerRef" 
                 :videoUrl="videoInfo?.url" 
                 @loaded-meta-data="data => videoDisplayInfo = data" 
             />
@@ -13,7 +13,7 @@
         </div>
     </el-card>
     <el-card>
-        <CustomTimeLine />
+        <CustomTimeLine ref="timeLineRef" :duration="videoInfo?.duration" v-model:current-time="currentTime" />
     </el-card>
     <el-card>
         <CustomVideoTools v-on="toolHandlers" />
@@ -30,35 +30,44 @@ import CustomVideoCropper from './components-custom/CustomVideoCropper.vue';
 import CustomVideoTools from './components-custom/CustomVideoTools.vue'
 import CustomTimeLine from './components-custom/CustomTimeLine.vue';
 
+import { watch } from 'vue'
+
+const videoPlayerRef = ref()
+const timeLineRef = ref()
 const videoInfo = ref<VideoInfo | null>(null)
 const videoDisplayInfo = ref<VideoDisplayInfo>()
 const selection = ref<Selection | undefined>()
 
-const videoPlayer = ref()
+const currentTime = ref<number>(0)
+watch(currentTime, () => {
+    videoPlayerRef.value.setCurrentTime(currentTime.value)
+})
+
+
 const toolHandlers = {
     play: () => {
-        videoPlayer.value.play()
+        videoPlayerRef.value.play()
     },
     pause: () => {
-        videoPlayer.value.pause()
+        videoPlayerRef.value.pause()
     },
     backward: () => {
-        videoPlayer.value.backward()
+        videoPlayerRef.value.backward()
     },
     forward: () => {
-        videoPlayer.value.forward()
+        videoPlayerRef.value.forward()
     },
     jumpStart: () => {
-        videoPlayer.value.jumpStart()
+        videoPlayerRef.value.jumpStart()
     },
     jumpEnd: () => {
-        videoPlayer.value.jumpEnd()
+        videoPlayerRef.value.jumpEnd()
     },
     prevFrame: () => {
-        videoPlayer.value.prevFrame()
+        videoPlayerRef.value.prevFrame()
     },
     nextFrame: () => {
-        videoPlayer.value.nextFrame()
+        videoPlayerRef.value.nextFrame()
     },
     setSegmentStartTime: () => {
 

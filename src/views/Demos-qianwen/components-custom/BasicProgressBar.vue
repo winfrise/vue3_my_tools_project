@@ -2,8 +2,6 @@
   <div class="progress" @click="handleClick">
     <!-- <div class="percent" :style="{ width: `${displayPercent}%` }"></div> -->
 
-    xxx{{ startMarker }}
-
     <BasicContextMenu style="background: red;" :style="{ position: 'absolute', top: 0, left: `${displayPercent}%` }">
       <BasicIndicatorLine />
 

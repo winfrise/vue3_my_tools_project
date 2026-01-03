@@ -168,6 +168,12 @@ const nextFrame = async () => {
   })
 }
 
+const setCurrentTime = (currentTime:number) => {
+  if (videoRef.value) {
+    videoRef.value.currentTime = currentTime
+  }
+}
+
 // ========== 暴露方法给父组件 ==========
 defineExpose({
   play,
@@ -179,6 +185,7 @@ defineExpose({
   jumpEnd,
   prevFrame,
   nextFrame,
+  setCurrentTime,
 })
 
 </script>
