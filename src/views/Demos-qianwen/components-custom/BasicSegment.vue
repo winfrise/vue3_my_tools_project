@@ -1,20 +1,29 @@
 <template>
     <div class="segment"
         :style="{
-            left: `${seg.offsetX}%`,
-            width: `${seg.offsetY - seg.offsetX}%`
+            left: `${offsetX}%`,
+            width: `${offsetWidth}%`
         }"
     ></div>
 </template>
 
 <script setup lang="ts">
+    import { computed } from 'vue';
     import { Segment } from '../types/custom';
     interface Props {
+        duration: number,
         seg: Segment,
     }
 
     const props = defineProps<Props>()
 
+    const offsetX = computed(() => {
+        return props.seg.startTime / props.duration * 100
+    })
+
+    const offsetWidth = computed(() => {
+        return (props.seg.endTime - props.seg.startTime) / props.duration * 100
+    })
 
 </script>
 

@@ -55,6 +55,8 @@ const beforeUpload = (file: File) => {
             }
             emit('update:videoInfo', videoInfo.value)
         })
+        
+    return false
 }
 
 

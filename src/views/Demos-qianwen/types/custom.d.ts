@@ -34,18 +34,9 @@ export interface Selection {
 }
 
 export interface Segment {
-  id: string,
-  offsetX: number,
-  offsetY: number
-}
-
-export interface VideoSegment {
   id: string;
   startTime: number; // 秒
   endTime: number;   // 秒
-  duration: number;  // 持续时间（秒）
-  frames: number;    // 帧数
-  size: string;      // 大约大小
   enableCrop?: boolean;
   cropWidth?: number; // 原始视频像素宽度
   cropHeight?: number; // 原始视频像素高度

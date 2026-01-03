@@ -13,7 +13,8 @@
         </div>
     </el-card>
     <el-card>
-        <CustomTimeLine ref="timeLineRef" :duration="videoInfo?.duration" v-model:current-time="currentTime" />
+        {{ currentTime }}
+        <CustomTimeLine ref="timeLineRef" :duration="videoInfo?.duration || 0" v-model:current-time="currentTime" />
     </el-card>
     <el-card>
         <CustomVideoTools v-on="toolHandlers" />
@@ -70,11 +71,11 @@ const toolHandlers = {
         videoPlayerRef.value.nextFrame()
     },
     setSegmentStartTime: () => {
-
+        timeLineRef.value.markStartPosition()
         
     },
     setSegmentEndTime: () => {
-
+        timeLineRef.value.markEndPosition()
     }
 }
 </script>
