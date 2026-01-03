@@ -49,40 +49,39 @@
 
 
     interface Props {
-      selection: Selection
+      initSelection: Selection | null,
+      maxSelection: Selection | null,
     }
 
     const props = defineProps<Props>();
 
-    const initSelection = ref(props.selection)
+    const initSelection = ref(props.initSelection)
 
     const emit = defineEmits<{
-        (e: 'update:selection', data: Selection):void
+        (e: 'selectionChange', data: Selection):void
     }>()
 
 
-    const selection = ref<Selection>()
-
     const handleCropperSelectionChange = (e: CustomEvent) => {
-        console.log(e)
-        // const cropperCanvas = cropperCanvasRef.value as CropperCanvas;
-
-        //     if (!cropperCanvas) {
-        //         return;
-        //     }
-
-        //     const selection = event.detail as Selection;
-        //     const { maxSelection } = props
-        //     if (maxSelection) {
-        //         if (!checkInSelection(selection, maxSelection)) {
-        //             event.preventDefault();
-        //         }
-        //     }
-        //     selectionData.value = event.detail;
-        //     console.log(event)
-        //     emit('selectionChange', unref(selectionData))
         const { x, y, width, height} = e.detail
-        selection.value = {cropX: x, cropY: y, cropWidth: width, cropHeight: height}
-        emit('update:selection', selection.value!)
+        const selection = {cropX: x, cropY: y, cropWidth: width, cropHeight: height}
+
+        const { maxSelection } = props
+        if (maxSelection) {
+            if (!checkInSelection(selection, maxSelection)) {
+                e.preventDefault();
+            }
+        }
+
+        emit('selectionChange', selection)
+    }
+
+    const checkInSelection = (selection: Selection, maxSelection: Selection) => {
+        return (
+            selection.cropX >= maxSelection.cropX
+            && selection.cropY >= maxSelection.cropY
+            && (selection.cropX + selection.cropWidth) <= (maxSelection.cropX + maxSelection.cropWidth)
+            && (selection.cropY + selection.cropHeight) <= (maxSelection.cropY + maxSelection.cropHeight)
+        );
     }
 </script>

@@ -74,11 +74,13 @@ const handleTimeUpdate = (e) => {
 const videoRef = ref()
 // 播放
 const play = () => {
+  if (!videoRef.value) return
   videoRef.value.play()
 }
 
 // 暂停
 const pause = () => {
+  if (!videoRef.value) return
   videoRef.value.pause()
 }
 

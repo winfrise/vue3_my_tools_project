@@ -16,13 +16,15 @@
                     />
                     <CustomVideoCropper class="video-cropper" 
                         v-if="selectedSegmentId && selectedSegment?.enableCrop"
-                        :selection="{
+                        :maxSelection="maxSelection"
+                        :initSelection="selectedSegment.cropX && selectedSegment.cropY && selectedSegment.cropWidth && selectedSegment.cropHeight 
+                            ? {
                             cropX: selectedSegment.cropX, 
                             cropY: selectedSegment.cropY,
                             cropWidth: selectedSegment.cropWidth,
                             cropHeight: selectedSegment.cropHeight
-                        }"
-                        @update:selection="data =>  Object.assign(selectedSegment!, {...data})" 
+                            } : null"
+                        @selection-change="data =>  Object.assign(selectedSegment!, {...data})" 
                     />
                 </div>
             </el-card>
@@ -42,7 +44,7 @@
             </el-card>
         </el-main>
 
-        <el-aside width="250px">
+        <el-aside width="320px">
             <CustomSegementList :segments="segments" :selectedSegmentId="selectedSegmentId" />
         </el-aside>
     </el-container>
@@ -67,9 +69,20 @@ const videoDisplayInfo = ref<VideoDisplayInfo>()
 const isPlaying = ref<boolean>(false)
 
 const segments = ref<Segment[]>([]) // 视频片断列表
-const selectedSegmentId = ref()
+const selectedSegmentId = ref<string | null>(null)
 const selectedSegment = computed(() => {
     return segments.value.find(item=> item.id === selectedSegmentId.value)
+})
+
+
+const maxSelection = computed(() => {
+    if (!videoDisplayInfo) return null
+    return {
+        cropX: videoDisplayInfo.value?.offsetX, 
+        cropY: videoDisplayInfo.value?.offsetY,
+        cropWidth: videoDisplayInfo.value?.displayWidth,
+        cropHeight: videoDisplayInfo.value?.displayHeight,
+    }
 })
 
 const updateSelectedSegmentId = async (val) => {

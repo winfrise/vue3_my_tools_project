@@ -1,6 +1,6 @@
 <template>
   <div class="progress" @click="handleClick">
-    <div class="percent" :style="{ width: `${innerPercent}%` }"></div>
+    <!-- <div class="percent" :style="{ width: `${innerPercent}%` }"></div> -->
 
     <BasicContextMenu style="background: red;" :style="{ position: 'absolute', top: 0, left: `${innerPercent}%` }">
       <BasicIndicatorLine />
@@ -37,7 +37,7 @@ interface Props {
     videoDuration: number,
     currentTime: number,
     segments: Segment[],
-    selectedSegmentId: string | undefined
+    selectedSegmentId: string | null
 }
 
 const props = defineProps<Props>()
@@ -64,7 +64,7 @@ const handleClick = (e: MouseEvent) => {
   }
 
   const rect = currentTarget.getBoundingClientRect()
-  debugger
+
   const clickX = e.clientX - rect.left
   const newCurrentTime = (clickX / rect.width) * props.videoDuration
   const clamped = Math.max(0, Math.min(props.videoDuration, newCurrentTime))
