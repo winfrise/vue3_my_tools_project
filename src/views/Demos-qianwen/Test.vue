@@ -2,16 +2,17 @@
     <el-card>
         <CustomVideoUpload v-model:videoInfo="videoInfo" />
     </el-card>
-    {{ selectedSegmentId }}
-    {{ selectedSegment }}
 
     <el-container>
         <el-main>
             <el-card>
                 <div class="video-wrapper">
                     <CustomVideoPlayer ref="videoPlayerRef" 
-                        :videoUrl="videoInfo?.url" 
+                        :videoUrl="videoInfo?.url"
+                        @play="isPlaying = true"
+                        @pause="isPlaying = false"
                         @loaded-meta-data="data => videoDisplayInfo = data" 
+                        @timeupdate="val => currentTime = val "
                     />
                     <CustomVideoCropper class="video-cropper" 
                         v-if="selectedSegmentId && selectedSegment?.enableCrop"
@@ -28,14 +29,16 @@
             <el-card>
                 <CustomTimeLine ref="timeLineRef" 
                     :video-duration="videoInfo?.duration || 0" 
-                    v-model:current-time="currentTime"   
+                    :current-time="currentTime"   
                     :segments="segments"
                     :selectedSegmentId="selectedSegmentId"
+                    @addSegment="data => segments.push(data)"
                     @update:selectedSegmentId="updateSelectedSegmentId"
+                    @update:current-time="updateCurrentTimeByTimeline"
                 />
             </el-card>
             <el-card>
-                <CustomVideoTools v-on="toolHandlers" />
+                <CustomVideoTools :is-playing="isPlaying" v-on="toolHandlers" />
             </el-card>
         </el-main>
 
@@ -61,6 +64,7 @@ const videoPlayerRef = ref()
 const timeLineRef = ref()
 const videoInfo = ref<VideoInfo | null>(null)
 const videoDisplayInfo = ref<VideoDisplayInfo>()
+const isPlaying = ref<boolean>(false)
 
 const segments = ref<Segment[]>([]) // 视频片断列表
 const selectedSegmentId = ref()
@@ -75,9 +79,11 @@ const updateSelectedSegmentId = async (val) => {
 }
 
 const currentTime = ref<number>(0)
-watch(currentTime, () => {
-    videoPlayerRef.value.setCurrentTime(currentTime.value)
-})
+const updateCurrentTimeByTimeline = (val) => {
+    currentTime.value = val
+    videoPlayerRef.value.setCurrentTime(val)
+    videoPlayerRef.value.pause()
+}
 
 
 const toolHandlers = {
@@ -106,10 +112,12 @@ const toolHandlers = {
         videoPlayerRef.value.nextFrame()
     },
     setSegmentStartTime: () => {
+        videoPlayerRef.value.pause()
         timeLineRef.value.markStartPosition()
         
     },
     setSegmentEndTime: () => {
+        videoPlayerRef.value.pause()
         timeLineRef.value.markEndPosition()
     }
 }

@@ -1,6 +1,6 @@
 <template>
   <div class="progress" @click="handleClick">
-    <!-- <div class="percent" :style="{ width: `${displayPercent}%` }"></div> -->
+    <div class="percent" :style="{ width: `${innerPercent}%` }"></div>
 
     <BasicContextMenu style="background: red;" :style="{ position: 'absolute', top: 0, left: `${innerPercent}%` }">
       <BasicIndicatorLine />
@@ -19,7 +19,7 @@
     <BasicStartMarker v-if="startMarker" :offset-x="startMarker / props.videoDuration * 100" />
 
     <BasicSegment v-for="seg in props.segments" :key="seg.id" :seg="seg" :duration="props.videoDuration" 
-      @click.native="emit('update:selectedSegmentId', seg.id)"
+      @click="emit('update:selectedSegmentId', seg.id)"
     />
   </div>
 </template>
@@ -37,7 +37,7 @@ interface Props {
     videoDuration: number,
     currentTime: number,
     segments: Segment[],
-    selectedSegmentId: string
+    selectedSegmentId: string | undefined
 }
 
 const props = defineProps<Props>()
@@ -45,6 +45,7 @@ const props = defineProps<Props>()
 const emit = defineEmits<{
   (e: 'update:currentTime', value: number): void
   (e: 'update:selectedSegmentId', value: string | null) : void
+  (e: 'addSegment', data: Segment): void
 }>()
     
 // 计算当前应显示的百分比
@@ -54,17 +55,19 @@ const innerPercent = computed(() => {
 
 // 👇 关键：点击时，根据模式决定如何更新
 const handleClick = (e: MouseEvent) => {
-  const el = e.currentTarget as HTMLElement
+
+  const currentTarget = e.currentTarget as HTMLElement
   const target = e.target as HTMLElement
-  if (el === target) {
+
+  if (currentTarget === target && props.selectedSegmentId) {
     emit('update:selectedSegmentId', null)
   }
-  const rect = el.getBoundingClientRect()
-  if (rect.width <= 0) return
 
+  const rect = currentTarget.getBoundingClientRect()
+  debugger
   const clickX = e.clientX - rect.left
   const newCurrentTime = (clickX / rect.width) * props.videoDuration
-  const clamped = Math.max(0, Math.min(100, newCurrentTime))
+  const clamped = Math.max(0, Math.min(props.videoDuration, newCurrentTime))
 
   emit('update:currentTime', clamped)
 }
@@ -95,7 +98,8 @@ const markEndPosition = () => {
     endTime: endMark,
   };
 
-  props.segments.push(newSegment)
+  emit('addSegment', newSegment)
+
   startMarker.value = null;
 }
 

@@ -21,7 +21,7 @@
     </el-button>
 
     <el-button @click="togglePlayPause">
-        <el-icon v-if="isPlaying" size="24"><VideoPause /></el-icon>
+        <el-icon v-if="props.isPlaying" size="24"><VideoPause /></el-icon>
         <el-icon v-else size="24"><VideoPlay/></el-icon>
     </el-button>
 
@@ -49,15 +49,11 @@
 
 <script lang="ts" setup>
 import { VideoPlay, VideoPause, ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
-import { computed, ref } from 'vue'
 
-const props = defineProps({
-  isPlaying: {
-    type: Boolean,
-    required: false,
-    default: undefined
-  }
-} as const)
+interface Props {
+    isPlaying: boolean
+}
+const props = defineProps<Props>()
 
 const emit = defineEmits<{
     (e: 'update:isPlaying', value: boolean): void
@@ -73,27 +69,12 @@ const emit = defineEmits<{
     (e: 'set-segment-end-time'): void
 }>()
 
-const internalIsPlaying = ref(false)
-
-const isPlaying = computed({
-    get() {
-        return props.isPlaying !== undefined ? props.isPlaying : internalIsPlaying.value
-    },
-    set(value : boolean) {
-        emit('update:isPlaying', value)
-    
-        if (props.isPlaying === undefined) {
-            internalIsPlaying.value = value
-        }
-    }
-})
 
 const togglePlayPause = () => {
-    isPlaying.value =  !isPlaying.value
-    if (isPlaying.value) {
-        emit('play')
-    } else {
+    if (props.isPlaying) {
         emit('pause')
+    } else {
+        emit('play')
     }
 }
 </script>

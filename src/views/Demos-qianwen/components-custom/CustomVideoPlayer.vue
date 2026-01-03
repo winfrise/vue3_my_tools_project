@@ -2,6 +2,10 @@
     <video :controls="false" class="video" ref="videoRef"
       :src="props.videoUrl"
       @loadedmetadata="handleLoadedMetaData"
+      @timeupdate="handleTimeUpdate"
+      @play="emit('play')"
+      @pause="emit('pause')"
+
     />
 </template>
 
@@ -17,6 +21,9 @@ const props = defineProps<Props>();
 
 const emit = defineEmits<{
   (e: 'loadedMetaData', data: VideoDisplayInfo) : void
+  (e: 'timeupdate', val: number) :void
+  (e: 'play'):void
+  (e: 'pause'):void
 }>()
 
 const videoDisplayInfo = ref<VideoDisplayInfo | null>(null)
@@ -57,6 +64,12 @@ const handleLoadedMetaData = (e : Event) => {
   emit('loadedMetaData', videoDisplayInfo.value)
 }
 
+const handleTimeUpdate = (e) => {
+  console.log(videoRef.value.currentTime)
+  if (videoRef.value) {
+    emit('timeupdate', videoRef.value.currentTime)
+  }
+};
 
 const videoRef = ref()
 // 播放

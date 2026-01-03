@@ -138,7 +138,7 @@ import { Segment } from '../types/custom';
 
 interface Props {
   segments: Segment[],
-  selectedSegmentId: string
+  selectedSegmentId: string | null
 }
 
 const props = defineProps<Props>()
