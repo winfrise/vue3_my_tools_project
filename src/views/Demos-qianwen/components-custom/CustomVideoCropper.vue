@@ -75,7 +75,8 @@
         //     selectionData.value = event.detail;
         //     console.log(event)
         //     emit('selectionChange', unref(selectionData))
-        selection.value = e.detail
+        const { x, y, width, height} = e.detail
+        selection.value = {cropX: x, cropY: y, cropWidth: width, cropHeight: height}
         emit('update:selection', selection.value!)
     }
 </script>

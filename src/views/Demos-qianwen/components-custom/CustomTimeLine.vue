@@ -18,7 +18,9 @@
 
     <BasicStartMarker v-if="startMarker" :offset-x="startMarker / props.videoDuration * 100" />
 
-    <BasicSegment v-for="seg in props.segments" :key="seg.id" :seg="seg" :duration="props.videoDuration" />
+    <BasicSegment v-for="seg in props.segments" :key="seg.id" :seg="seg" :duration="props.videoDuration" 
+      @click.native="emit('update:selectedSegmentId', seg.id)"
+    />
   </div>
 </template>
 
@@ -42,6 +44,7 @@ const props = defineProps<Props>()
 
 const emit = defineEmits<{
   (e: 'update:currentTime', value: number): void
+  (e: 'update:selectedSegmentId', value: string) : void
 }>()
     
 // 计算当前应显示的百分比

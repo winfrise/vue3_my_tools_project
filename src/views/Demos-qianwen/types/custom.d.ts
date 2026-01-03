@@ -27,10 +27,10 @@ export interface SelectionOptions {
 }
 
 export interface Selection {
-  x: number,
-  y: number,
-  width: number,
-  height: number,
+  cropX: number,
+  cropY: number,
+  cropWidth: number,
+  cropHeight: number,
 }
 
 export interface Segment {

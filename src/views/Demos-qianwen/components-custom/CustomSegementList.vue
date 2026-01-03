@@ -134,7 +134,7 @@
 <script lang="ts" setup>
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { CopyDocument, DocumentCopy, Delete } from '@element-plus/icons-vue'
-import { Segment } from '../types/video';
+import { Segment } from '../types/custom';
 
 interface Props {
   segments: Segment[],

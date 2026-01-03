@@ -2,8 +2,8 @@
     <el-card>
         <CustomVideoUpload v-model:videoInfo="videoInfo" />
     </el-card>
-{{ segments }}
-{{ selection }}
+{{ selectedSegment }}
+{{ selectedSegmentId }}
     <el-container>
         <el-main>
             <el-card>
@@ -12,7 +12,7 @@
                         :videoUrl="videoInfo?.url" 
                         @loaded-meta-data="data => videoDisplayInfo = data" 
                     />
-                    <CustomVideoCropper class="video-cropper" @update:selection="data => selection = data" />
+                    <CustomVideoCropper class="video-cropper" @update:selection="data =>  Object.assign(selectedSegment!, {...data})" />
                 </div>
             </el-card>
             <el-card>
@@ -20,7 +20,7 @@
                     :video-duration="videoInfo?.duration || 0" 
                     v-model:current-time="currentTime"   
                     :segments="segments"
-                    :selectedSegmentId="selectedSegmentId"
+                    v-model:selectedSegmentId="selectedSegmentId"
                 />
             </el-card>
             <el-card>
@@ -33,13 +33,11 @@
         </el-aside>
     </el-container>
 
-
-
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { VideoInfo, VideoDisplayInfo, Selection } from './types/custom'
+import { computed, ref } from 'vue'
+import { VideoInfo, VideoDisplayInfo, Selection, Segment } from './types/custom'
 
 import CustomVideoUpload from './components-custom/CustomVideoUpload.vue';
 import CustomVideoPlayer from './components-custom/CustomVideoPlayer.vue'
@@ -54,10 +52,17 @@ const videoPlayerRef = ref()
 const timeLineRef = ref()
 const videoInfo = ref<VideoInfo | null>(null)
 const videoDisplayInfo = ref<VideoDisplayInfo>()
-const selection = ref<Selection | undefined>()
 
-const segments = ref([]) // 视频片断列表
+const segments = ref<Segment[]>([]) // 视频片断列表
 const selectedSegmentId = ref()
+const selectedSegment = computed({
+    get () {
+        return segments.value.find(item=> item.id === selectedSegmentId.value)
+    },
+    set(data : Selection) {
+
+    }
+})
 
 const currentTime = ref<number>(0)
 watch(currentTime, () => {
