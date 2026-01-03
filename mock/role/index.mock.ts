@@ -78,6 +78,13 @@ const adminList = [
           title: '千问Demo'
         }
       },
+      {
+        path: 'demo-test',
+        component: 'views/Demos-qianwen/Test',
+        meta: {
+          title: '测试'
+        }
+      },
     ]
   },
   {
