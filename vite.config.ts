@@ -132,6 +132,23 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
             // 6. 开发构建时显示进度条
             progress(),
 
+            // 7. 【按需加载 Element Plus 样式】
+            createStyleImportPlugin({
+                resolves: [ElementPlusResolve()],
+                libs: [
+                    {
+                        libraryName: 'element-plus',
+                        esModule: true,
+                        resolveStyle: name => {
+                            // click-outside 是 JS 工具，无样式，跳过
+                            if (name === 'click-outside') return '';
+                            // 按需引入对应组件的 CSS 文件
+                            return `element-plus/es/components/${name.replace(/^el-/, '')}/style/css`;
+                        },
+                    },
+                ],
+            }),
+
             // 8. SVG 雪碧图插件：将本地 SVG 合并为 <symbol>，通过 <use> 引用
             createSvgIconsPlugin({
                 iconDirs: [pathResolve('src/assets/svgs')], // SVG 文件目录
