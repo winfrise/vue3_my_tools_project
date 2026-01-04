@@ -64,6 +64,7 @@
   "devDependencies": {
     "@commitlint/cli": "^19.6.1",
     "@commitlint/config-conventional": "^19.6.0",
+    "@eslint/js": "^9.39.2",
     "@iconify/json": "^2.2.293",
     "@types/fs-extra": "^11.0.4",
     "@types/inquirer": "^9.0.7",
@@ -131,13 +132,7 @@
     "node": ">=18.0.0",
     "pnpm": ">=8.1.0"
   },
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/kailong321200875/vue-element-plus-admin.git"
-  },
-  "bugs": {
-    "url": "https://github.com/kailong321200875/vue-element-plus-admin/issues"
-  },
-  "homepage": "https://github.com/kailong321200875/vue-element-plus-admin"
+  "lint-staged": {
+    "*.{vue,ts,js,json,css,scss}": "prettier --write"
+  }
 }

@@ -44,7 +44,9 @@ const beforeUpload = (file: File) => {
 
     const url = URL.createObjectURL(file);
     loadVideo(url)
-        .then(({videoWidth, videoHeight, duration}) => {
+        .then(e => {
+            console.log(e)
+            const {videoWidth, videoHeight, duration} = e
             videoInfo.value = {
                 videoWidth,
                 videoHeight,
@@ -61,27 +63,50 @@ const beforeUpload = (file: File) => {
 
 
 // 加载视频，获取视频元数据
-const loadVideo = (url: string):Promise<VideoMetadata>  => {
-    return new Promise((resolve, reject) => {
-        const video = document.createElement('video');
-        video.src = url;
-        
-        const onloadedmetadata = () => {
-            resolve({
-                duration: video.duration,
-                videoWidth: video.videoWidth,
-                videoHeight: video.videoHeight,
-            })
-        }
+const loadVideo = (url: string): Promise<VideoMetadata> => {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement('video');
+    video.src = url;
+    video.preload = 'metadata'; // 建议加上，提示只加载元数据
 
-        const onerror = () => {
-            reject()
-        }
+    const cleanup = () => {
+      video.onloadedmetadata = null;
+      video.onerror = null;
+    };
 
-        video.onloadedmetadata = onloadedmetadata
-        video.onerror = onerror
-    })
-}
+    const onloadedmetadata = () => {
+      cleanup();
+      
+      // 检查 duration 是否有效
+      if (isNaN(video.duration) || video.duration <= 0) {
+        reject(new Error('Invalid video duration'));
+        return;
+      }
+
+      resolve({
+        duration: video.duration,
+        videoWidth: video.videoWidth,
+        videoHeight: video.videoHeight,
+      });
+    };
+
+    const onerror = () => {
+      cleanup();
+      reject(new Error('Failed to load video metadata'));
+    };
+
+    video.onloadedmetadata = onloadedmetadata;
+    video.onerror = onerror;
+
+    // 可选：防止长时间无响应
+    setTimeout(() => {
+      if (video.readyState < 1) {
+        cleanup();
+        reject(new Error('Video metadata load timeout'));
+      }
+    }, 10000);
+  });
+};
 </script>
 
 <style lang="scss" scoped>

@@ -1,11 +1,27 @@
 {
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "prettier.enable": true,
+  "editor.formatOnSave": true,
+  "editor.detectIndentation": false,
+
+    // ✅ 关键：启用保存时自动修复 ESLint
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
+
+  // ✅ 关键：指定 .vue 文件使用 Prettier 格式化
   "[vue]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "god.tsconfig": "./tsconfig.json",
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  // ✅ 禁用 TS/JS 自带格式化（交给 Prettier）
+  "typescript.format.enable": false,
+  "javascript.format.enable": false,
+  
+
+
 }

@@ -1,53 +1,53 @@
-import 'vue/jsx'
+import 'vue/jsx';
 
 // 引入windi css
-import '@/plugins/unocss'
+import '@/plugins/unocss';
 
 // 导入全局的svg图标
-import '@/plugins/svgIcon'
+import '@/plugins/svgIcon';
 
 // 引入状态管理
-import { setupStore } from '@/store'
+import { setupStore } from '@/store';
 
 // 全局组件
-import { setupGlobCom } from '@/components'
+// import { setupGlobCom } from '@/components'
 
 // 引入element-plus
-import { setupElementPlus } from '@/plugins/elementPlus'
+import { setupElementPlus } from '@/plugins/elementPlus';
 
 // 引入全局样式
-import '@/styles/index.less'
+import '@/styles/index.less';
 
 // 引入动画
-import '@/plugins/animate.css'
+import '@/plugins/animate.css';
 
 // 路由
-import { setupRouter } from './router'
+import { setupRouter } from './router';
 
 // 权限
-import { setupPermission } from './directives'
+import { setupPermission } from './directives';
 
-import { createApp } from 'vue'
+import { createApp } from 'vue';
 
-import App from './App.vue'
+import App from './App.vue';
 
-import './permission'
+import './permission';
 
 // 创建实例
 const setupAll = async () => {
-  const app = createApp(App)
+    const app = createApp(App);
 
-  setupStore(app)
+    setupStore(app);
 
-  setupGlobCom(app)
+    //   setupGlobCom(app)
 
-  setupElementPlus(app)
+    setupElementPlus(app);
 
-  setupRouter(app)
+    setupRouter(app);
 
-  setupPermission(app)
+    setupPermission(app);
 
-  app.mount('#app')
-}
+    app.mount('#app');
+};
 
-setupAll()
+setupAll();
