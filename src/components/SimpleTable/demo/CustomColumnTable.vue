@@ -68,16 +68,17 @@ const columns = [
                 <div>
                     <ElButton
                         size="small"
+                        type="primary"
                         onClick={() => handleEdit(index, row)}
                     >
-                        Edit
+                        编辑
                     </ElButton>
                     <ElButton
                         size="small"
                         type="danger"
                         onClick={() => handleDelete(index, row)}
                     >
-                        Delete
+                        删除
                     </ElButton>
                 </div>
             ),

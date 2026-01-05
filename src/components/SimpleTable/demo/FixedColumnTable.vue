@@ -13,33 +13,33 @@ const handleClick = row => {
 const columns = [
     {
         field: 'date',
-        label: 'Date',
+        label: '日期',
         width: 150,
         fixed: 'left' as const, // 或 true
     },
     {
         field: 'name',
-        label: 'Name',
+        label: '姓名',
         width: 120,
     },
     {
         field: 'state',
-        label: 'State',
+        label: '状态',
         width: 120,
     },
     {
         field: 'city',
-        label: 'City',
+        label: '城市',
         width: 120,
     },
     {
         field: 'address',
-        label: 'Address',
+        label: '地址',
         width: 600,
     },
     {
         field: 'zip',
-        label: 'Zip',
+        label: '邮编',
         width: 120,
     },
     {
@@ -47,7 +47,7 @@ const columns = [
         minWidth: 120,
         fixed: 'right' as const,
         slots: {
-            default: (row: any) => (
+            default: ({ row }) => (
                 <div>
                     <el-button
                         link
@@ -55,10 +55,10 @@ const columns = [
                         size="small"
                         onClick={() => handleClick(row)}
                     >
-                        Detail
+                        详情
                     </el-button>
                     <el-button link type="primary" size="small">
-                        Edit
+                        编辑
                     </el-button>
                 </div>
             ),

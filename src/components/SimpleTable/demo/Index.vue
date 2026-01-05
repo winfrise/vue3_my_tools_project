@@ -79,6 +79,24 @@
                 <CustomIndexTable />
             </template>
         </DemoBlock>
+
+        <DemoBlock title="请求示例" :source="example1Code">
+            <template #demo>
+                <Example1 />
+            </template>
+        </DemoBlock>
+
+        <DemoBlock title="全功能示例" :source="example2Code">
+            <template #demo>
+                <Example2 />
+            </template>
+        </DemoBlock>
+
+        <DemoBlock title="TableHook 示例" :source="example3Code">
+            <template #demo>
+                <Example3 />
+            </template>
+        </DemoBlock>
     </div>
 </template>
 
@@ -123,6 +141,15 @@ import customColumnTableCode from './CustomColumnTable.vue?raw';
 
 import CustomIndexTable from './CustomIndexTable.vue';
 import customIndexTableCode from './CustomIndexTable.vue?raw';
+
+import Example1 from './Example1.vue';
+import example1Code from './Example1.vue?raw';
+
+import Example2 from './Example2.vue';
+import example2Code from './Example2.vue?raw';
+
+import Example3 from './Example3.vue';
+import example3Code from './Example3.vue?raw';
 </script>
 
 <style scoped></style>
