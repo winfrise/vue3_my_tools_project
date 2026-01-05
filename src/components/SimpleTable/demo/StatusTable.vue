@@ -32,8 +32,6 @@ const tableRowClassName = ({
     row: User;
     rowIndex: number;
 }) => {
-    console.log(row);
-    console.log(rowIndex);
     if (rowIndex === 1) {
         return 'warning-row';
     } else if (rowIndex === 3) {

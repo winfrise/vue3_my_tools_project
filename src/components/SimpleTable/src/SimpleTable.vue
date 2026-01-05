@@ -8,8 +8,8 @@ import type { TableProps, PaginationProps } from 'element-plus';
 type Recordable = Record<string, any>;
 
 interface TableColumn {
-    field: string;
-    label: string;
+    field?: string;
+    label?: string;
     width?: number | string;
     minWidth?: number | string;
     fixed?: 'left' | 'right' | boolean;
@@ -131,8 +131,6 @@ const getRowClassName = ({
     rowIndex: number;
 }) => {
     if (typeof props.rowClassName === 'function') {
-        console.log(row);
-        console.log(rowIndex);
         return props.rowClassName({ row, rowIndex });
     }
     return props.rowClassName || '';
@@ -252,17 +250,19 @@ const getCellStyle = ({
                     :header-align="col.headerAlign || col.align || 'left'"
                     :show-overflow-tooltip="true"
                 >
-                    <template #default="{ row }">
+                    <template #default="{ row, $index }">
                         <!-- 自定义插槽优先 -->
                         <template v-if="col.slots?.default">
-                            <component :is="col.slots.default(row)" />
+                            <component
+                                :is="col.slots.default({ row, index: $index })"
+                            />
                         </template>
                         <!-- formatter 优先于默认文本 -->
                         <template v-else-if="col.formatter">
                             {{ col.formatter(row, col) }}
                         </template>
                         <!-- 默认显示字段值 -->
-                        <template v-else>
+                        <template v-else-if="col.field">
                             {{ row[col.field] }}
                         </template>
                     </template>
