@@ -43,7 +43,11 @@ export default [
             const { page = 1, limit = 10 } = query;
             const offset = (page - 1) * limit;
             const data = mockArticles();
-            const paginatedList = data.data.list.slice(offset, offset + limit);
+            const paginatedList = data.data.list.slice(
+                offset,
+                offset + Number(limit)
+            );
+            console.log(typeof offset, typeof limit);
             return {
                 ...data,
                 data: {

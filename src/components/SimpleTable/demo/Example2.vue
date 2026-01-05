@@ -1,6 +1,5 @@
 <!-- FullFeatureTableDemo.vue -->
 <template>
-    <h3>示例 3：全功能演示（包含所有你要求的功能）</h3>
     <SimpleTable
         :data="tableData"
         :columns="columns"
@@ -26,6 +25,7 @@
 <script setup lang="tsx">
 import { ref, computed, watch, onMounted } from 'vue';
 import type { CSSProperties } from 'vue';
+import { TableColumn } from '../src/types';
 
 const loading = ref(false);
 const pageSize = ref(5);
@@ -39,7 +39,7 @@ const pagination = computed(() => ({
 }));
 
 // ✅ 列配置：包含 align / headerAlign / 自定义渲染
-const columns = [
+const columns: TableColumn[] = [
     {
         type: 'selection',
         width: 55,
