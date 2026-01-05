@@ -1,5 +1,6 @@
 <template>
     <div class="demo-block">
+        <div class="demo-title">{{ props.title }}</div>
         <!-- 组件预览区 -->
         <div class="demo-preview">
             <slot name="demo"></slot>
@@ -35,6 +36,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useClipboard } from '@vueuse/core';
 
 const props = defineProps<{
+    title: string;
     source: string;
 }>();
 
@@ -100,6 +102,12 @@ const highlightedCode = computed(() => {
     border: 1px solid #e4e7ed;
     border-radius: 4px;
     overflow: hidden;
+}
+
+.demo-title {
+    font-size: 24px;
+    line-height: 1;
+    padding: 15px 16px 0;
 }
 
 .demo-preview {

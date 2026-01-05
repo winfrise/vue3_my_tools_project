@@ -48,7 +48,10 @@ const props = withDefaults(
         stripe?: boolean;
         reserveSelection?: boolean;
         reserveIndex?: boolean;
-        rowClassName?: (row: Recordable, rowIndex: number) => string | string;
+        rowClassName?: (data: {
+            row: Recordable;
+            rowIndex: number;
+        }) => string | string;
         rowStyle?: (
             row: Recordable,
             rowIndex: number
@@ -128,7 +131,9 @@ const getRowClassName = ({
     rowIndex: number;
 }) => {
     if (typeof props.rowClassName === 'function') {
-        return props.rowClassName(row, rowIndex);
+        console.log(row);
+        console.log(rowIndex);
+        return props.rowClassName({ row, rowIndex });
     }
     return props.rowClassName || '';
 };
