@@ -10,7 +10,7 @@ import { omit, cloneDeep } from 'lodash-es';
 
 const modules = import.meta.glob([
     '../views/**/*.{vue,tsx}',
-    '../views/CustomExample/**/*.{vue,tex}',
+    '../components/**/demo/*.{vue,tex}',
 ]);
 
 /* Layout */

@@ -95,6 +95,8 @@
     "inquirer": "^12.3.0",
     "less": "^4.2.1",
     "lint-staged": "^15.3.0",
+    "markdown-it": "^14.1.0",
+    "marked": "^17.0.1",
     "mockjs": "^1.1.0",
     "plop": "^4.0.1",
     "postcss": "^8.4.49",

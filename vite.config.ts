@@ -9,6 +9,8 @@ import type { UserConfig, ConfigEnv } from 'vite';
 import Vue from '@vitejs/plugin-vue';
 // 支持在 Vue 中使用 JSX/TSX 语法
 import VueJsx from '@vitejs/plugin-vue-jsx';
+// markdown文件转vue组件
+import md from 'vite-plugin-md';
 
 // 开发时显示构建进度条
 import progress from 'vite-plugin-progress';

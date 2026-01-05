@@ -563,45 +563,45 @@ const adminList = [
                 },
                 children: [
                     {
-                        path: 'example1',
-                        component: 'views/CustomExample/Example1',
-                        name: 'SingleTableExample1',
+                        path: 'example',
+                        component: 'components/SimpleTable/demo/Index',
+                        name: 'SingleTableBasicTable',
                         meta: {
-                            title: '综合示例 - 列表1',
+                            title: '基础表格',
                         },
                     },
-                    {
-                        path: 'example2',
-                        component: 'views/CustomExample/SimpleTable/Example2',
-                        name: 'SingleTableExample2',
-                        meta: {
-                            title: '综合示例 - 列表2',
-                        },
-                    },
-                    {
-                        path: 'example3',
-                        component: 'views/CustomExample/SimpleTable/Example3',
-                        name: 'SingleTableExample3',
-                        meta: {
-                            title: '综合示例 - 列表3',
-                        },
-                    },
-                    {
-                        path: 'example4',
-                        component: 'views/CustomExample/SimpleTable/Example4',
-                        name: 'SingleTableExample4',
-                        meta: {
-                            title: '综合示例 - 列表4',
-                        },
-                    },
-                    {
-                        path: 'example5',
-                        component: 'views/CustomExample/SimpleTable/Example5',
-                        name: 'SingleTableExample5',
-                        meta: {
-                            title: '综合示例 - 列表5',
-                        },
-                    },
+                    // {
+                    //     path: 'example2',
+                    //     component: 'views/CustomExample/SimpleTable/Example2',
+                    //     name: 'SingleTableExample2',
+                    //     meta: {
+                    //         title: '综合示例 - 列表2',
+                    //     },
+                    // },
+                    // {
+                    //     path: 'example3',
+                    //     component: 'views/CustomExample/SimpleTable/Example3',
+                    //     name: 'SingleTableExample3',
+                    //     meta: {
+                    //         title: '综合示例 - 列表3',
+                    //     },
+                    // },
+                    // {
+                    //     path: 'example4',
+                    //     component: 'views/CustomExample/SimpleTable/Example4',
+                    //     name: 'SingleTableExample4',
+                    //     meta: {
+                    //         title: '综合示例 - 列表4',
+                    //     },
+                    // },
+                    // {
+                    //     path: 'example5',
+                    //     component: 'views/CustomExample/SimpleTable/Example5',
+                    //     name: 'SingleTableExample5',
+                    //     meta: {
+                    //         title: '综合示例 - 列表5',
+                    //     },
+                    // },
                 ],
             },
         ],
