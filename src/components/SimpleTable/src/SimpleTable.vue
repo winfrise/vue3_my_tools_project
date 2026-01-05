@@ -30,68 +30,65 @@ interface Pagination {
 }
 
 // ============ Props ============
-const props = withDefaults(
-    defineProps<{
-        data: Recordable[];
-        columns: TableColumn[];
-        loading?: boolean;
-        pagination?: Pagination;
-        pageSize?: number;
-        currentPage?: number;
-        showAction?: boolean;
-        rowKey?: string;
-        height?: number | string;
-        maxHeight?: number | string;
-        border?: boolean;
-        size?: 'small' | 'default' | 'large';
-        // ✅ 新增 props
-        stripe?: boolean;
-        reserveSelection?: boolean;
-        reserveIndex?: boolean;
-        rowClassName?: (data: {
-            row: Recordable;
-            rowIndex: number;
-        }) => string | string;
-        rowStyle?: (
-            row: Recordable,
-            rowIndex: number
-        ) => CSSProperties | CSSProperties;
-        cellClassName?: (
-            row: Recordable,
-            column: TableColumn,
-            rowIndex: number,
-            columnIndex: number
-        ) => string | string;
-        cellStyle?: (
-            row: Recordable,
-            column: TableColumn,
-            rowIndex: number,
-            columnIndex: number
-        ) => CSSProperties | CSSProperties;
-    }>(),
-    {
-        loading: false,
-        pageSize: 10,
-        currentPage: 1,
-        showAction: false,
-        rowKey: 'id',
-        border: true,
-        size: 'default',
-        stripe: false,
-        reserveSelection: false,
-        reserveIndex: false,
-        rowClassName: undefined,
-        rowStyle: undefined,
-        cellClassName: undefined,
-        cellStyle: undefined,
-    }
-);
+interface Props {
+    data: Recordable[];
+    columns: TableColumn[];
+    loading?: boolean;
+    pagination?: Pagination;
+    pageSize?: number;
+    currentPage?: number;
+    rowKey?: string;
+    height?: number | string;
+    maxHeight?: number | string;
+    border?: boolean;
+    size?: 'small' | 'default' | 'large';
+    // ✅ 新增 props
+    stripe?: boolean;
+    reserveSelection?: boolean;
+    reserveIndex?: boolean;
+    rowClassName?: (data: {
+        row: Recordable;
+        rowIndex: number;
+    }) => string | string;
+    rowStyle?: (
+        row: Recordable,
+        rowIndex: number
+    ) => CSSProperties | CSSProperties;
+    cellClassName?: (
+        row: Recordable,
+        column: TableColumn,
+        rowIndex: number,
+        columnIndex: number
+    ) => string | string;
+    cellStyle?: (
+        row: Recordable,
+        column: TableColumn,
+        rowIndex: number,
+        columnIndex: number
+    ) => CSSProperties | CSSProperties;
+}
+
+const DEFAULT_PROPS = {
+    loading: false,
+    pageSize: 10,
+    currentPage: 1,
+    rowKey: 'id',
+    border: true,
+    size: 'default' as const,
+    stripe: false,
+    reserveSelection: false,
+    reserveIndex: false,
+    rowClassName: undefined,
+    rowStyle: undefined,
+    cellClassName: undefined,
+    cellStyle: undefined,
+};
+const props = withDefaults(defineProps<Props>(), DEFAULT_PROPS);
 
 // ============ Emit ============
 const emit = defineEmits<{
     (e: 'update:pageSize', val: number): void;
     (e: 'update:currentPage', val: number): void;
-    (e: 'refresh'): void;
 }>();
 
 // ============ Refs ============
@@ -118,9 +115,6 @@ const startIndex = computed(() => {
 });
 
 // ============ Methods ============
-const handleRefresh = () => {
-    emit('refresh');
-};
 
 // ✅ 行类名处理函数
 const getRowClassName = ({
@@ -195,11 +189,6 @@ const getCellStyle = ({
 
 <template>
     <div class="simple-table">
-        <!-- 工具栏 -->
-        <div v-if="showAction" class="table-toolbar">
-            <ElButton size="small" @click="handleRefresh">刷新</ElButton>
-        </div>
-
         <!-- 表格主体 -->
         <ElTable
             ref="elTableRef"
@@ -250,20 +239,18 @@ const getCellStyle = ({
                     :header-align="col.headerAlign || col.align || 'left'"
                     :show-overflow-tooltip="true"
                 >
-                    <template #default="{ row, $index }">
+                    <template #default="scope">
                         <!-- 自定义插槽优先 -->
                         <template v-if="col.slots?.default">
-                            <component
-                                :is="col.slots.default({ row, index: $index })"
-                            />
+                            <component :is="col.slots.default(scope)" />
                         </template>
                         <!-- formatter 优先于默认文本 -->
                         <template v-else-if="col.formatter">
-                            {{ col.formatter(row, col) }}
+                            {{ col.formatter(scope.row, col) }}
                         </template>
                         <!-- 默认显示字段值 -->
                         <template v-else-if="col.field">
-                            {{ row[col.field] }}
+                            {{ scope.row[col.field] }}
                         </template>
                     </template>
                 </ElTableColumn>
@@ -291,9 +278,6 @@ const getCellStyle = ({
 .simple-table {
     display: flex;
     flex-direction: column;
-}
-.table-toolbar {
-    margin-bottom: 12px;
 }
 .table-pagination {
     margin-top: 12px;
