@@ -68,7 +68,7 @@ interface Props {
     ) => CSSProperties | CSSProperties;
 }
 
-const DEFAULT_PROPS = {
+const props = withDefaults(defineProps<Props>(), {
     loading: false,
     pageSize: 10,
     currentPage: 1,
@@ -82,8 +82,7 @@ const DEFAULT_PROPS = {
     rowStyle: undefined,
     cellClassName: undefined,
     cellStyle: undefined,
-};
-const props = withDefaults(defineProps<Props>(), DEFAULT_PROPS);
+});
 
 // ============ Emit ============
 const emit = defineEmits<{
@@ -185,6 +184,10 @@ const getCellStyle = ({
     }
     return props.cellStyle || {};
 };
+
+defineExpose({
+    elTableRef, // 原生 ElTable 实例
+});
 </script>
 
 <template>

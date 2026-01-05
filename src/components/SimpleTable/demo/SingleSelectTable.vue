@@ -34,8 +34,8 @@ interface User {
 const currentRow = ref();
 const singleTableRef = ref<TableInstance>();
 
-const setCurrent = (row?: User) => {
-    singleTableRef.value!.setCurrentRow(row);
+const setCurrent = ({ row }) => {
+    // singleTableRef.value!.elTableRef.setCurrentRow(row);
 };
 const handleCurrentChange = (val: User | undefined) => {
     currentRow.value = val;
